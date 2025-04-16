@@ -1,2 +1,2 @@
 # Code-Generatie-Bank-App-Vue-Frontend
- Vue backend voor bank applicatie
+ Vue frontend voor bank applicatie
