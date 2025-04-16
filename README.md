@@ -1,4 +1,5 @@
-# week-1-demo-code-counter
+# Code-Generatie-Bank-App-Vue-Frontend
+ Vue frontend voor bank applicatie
 
 ## About
 
