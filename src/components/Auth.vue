@@ -1,8 +1,6 @@
 <script>
 import { API_ENDPOINTS } from "@/config";
 import axios from "axios";
-import Notification from "./Notification.vue";
-import Loading from "./Loading.vue";
 import { setAuthToken } from "@/utils/auth";
 
 export default {
