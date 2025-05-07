@@ -1,13 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import Home from "./components/Home.vue";
-import About from "./components/About.vue";
-import ArticleUpdate from "./components/ArticleUpdate.vue";
-import ArticleUpdateImproved from "./components/ArticleUpdateImproved.vue";
-import ArticleCreate from "./components/ArticleCreate.vue";
 import Auth from "./components/Auth.vue";
-import Profile from "./components/Profile.vue";
-import ArticlePage from "./components/ArticlePage.vue";
-import ReadLaterTable from "./components/ReadLaterTable.vue";
 import { getAuthToken, setAuthToken } from "@/utils/auth";
 import { createPinia } from "pinia";
 
@@ -28,36 +21,8 @@ const routes = [
     component: Home,
   },
   {
-    path: "/about",
-    component: About,
-  },
-  {
-    path: "/article",
-    component: ArticleCreate,
-  },
-  {
-    path: "/article/:id",
-    component: ArticlePage,
-  },
-  {
-    path: "/articles-edit/:id",
-    component: ArticleUpdate,
-  },
-  {
-    path: "/articles-improved/:id",
-    component: ArticleUpdateImproved,
-  },
-  {
     path: "/auth",
     component: Auth,
-  },
-  {
-    path: "/profile",
-    component: Profile,
-  },
-  {
-    path: "/read-later",
-    component: ReadLaterTable,
   },
 ];
 
