@@ -1,15 +1,3 @@
-<script>
-import { useArticlesStore } from "@/stores/articles";
-
-export default {
-  setup() {
-    const store = useArticlesStore();
-    return {
-      store,
-    };
-  },
-};
-</script>
 <template>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
@@ -28,3 +16,9 @@ export default {
     </main>
   </div>
 </template>
+<script>
+export default {
+  setup() {
+  },
+};
+</script>
