@@ -19,10 +19,6 @@ export default {
       success: null,
     };
   },
-  components: {
-    Notification,
-    Loading,
-  },
   methods: {
     toggleAuthMode() {
       this.isLogin = !this.isLogin;
