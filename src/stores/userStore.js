@@ -11,53 +11,55 @@ export const userStore = defineStore('store', {
   getters: {
     isLoggedIn: (state) => state.token != '',
     getUserId: (state) => state.user_id,
-    getUsername: (state) => state.username,
-    getRole: (state) => state.role,
+    // getRole: (state) => state.role,
     isEmployee: (state) => state.role == 'RULE_EMPLOYEE',
   },
   actions: {
-    async signup(username, email, password) {
-      const sanitizedUsername = username.trim().toLowerCase()
+    async signup(firstName, lastName, email, password, bsn) {
+      const sanitizedFirstName = firstName.trim().replace(/[^a-zA-Z'-]/g, '')
+      const sanitizedLastName = lastName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedEmail = email.trim().toLowerCase()
       try {
         const res = await axios.post('/users/signup', {
-          username: sanitizedUsername,
+          firstName: sanitizedFirstName,
+          lastName: sanitizedLastName,
+          email: sanitizedEmail,
+          password: password,
+          bsn: bsn
+        })
+        // await this.setUserData(res.data)
+        // await this.getUserRole()
+        return Promise.resolve()
+      } catch (error) {
+        return Promise.reject(error)
+      }
+    },
+    async login(email, password) {
+      const sanitizedEmail = email.trim().toLowerCase()
+      try {
+        const res = await axios.post('/users/login', {
           email: sanitizedEmail,
           password: password
         })
         await this.setUserData(res.data)
-        await this.getUserRole()
+        // await this.getUserRole()
         return Promise.resolve()
       } catch (error) {
         return Promise.reject(error)
       }
     },
-    async login(username, password) {
-      const sanitizedUsername = username.trim()
-      try {
-        const res = await axios.post('/users/login', {
-          username: sanitizedUsername,
-          password: password
-        })
-        await this.setUserData(res.data)
-        await this.getUserRole()
-        return Promise.resolve()
-      } catch (error) {
-        return Promise.reject(error)
-      }
-    },
-    async getUserRole() {
-      return new Promise((resolve, reject) => {
-        axios
-          .get(`/userrole/${this.user_id}`)
-          .then((res) => {
-            localStorage.setItem('role', res.data)
-            this.role = res.data
-            resolve()
-          })
-          .catch((error) => reject(error))
-      })
-    },
+    // async getUserRole() {
+    //   return new Promise((resolve, reject) => {
+    //     axios
+    //       .get(`/userrole/${this.user_id}`)
+    //       .then((res) => {
+    //         localStorage.setItem('role', res.data)
+    //         this.role = res.data
+    //         resolve()
+    //       })
+    //       .catch((error) => reject(error))
+    //   })
+    // },
     async setUserData(response) {
       localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.user_id)

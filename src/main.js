@@ -8,6 +8,8 @@ import "./assets/main.css";
 
 import { createApp } from "vue";
 import App from "./App.vue";
+import Login from "@/components/registration/Login.vue";
+import Signup from "@/components/registration/Signup.vue";
 
 // Initialize auth token if it exists
 const token = getAuthToken();
@@ -21,8 +23,12 @@ const routes = [
     component: Home,
   },
   {
-    path: "/auth",
-    component: Auth,
+    path: "/login",
+    component: Login,
+  },
+  {
+    path: "/signup",
+    component: Signup,
   },
 ];
 
