@@ -13,7 +13,7 @@ export const userStore = defineStore('store', {
     getUserId: (state) => state.user_id,
     getUsername: (state) => state.username,
     getRole: (state) => state.role,
-    isEmployee: (state) => state.role.toLowerCase() == 'moderator' || state.role.toLowerCase() == 'administrator',
+    isEmployee: (state) => state.role == 'RULE_EMPLOYEE',
   },
   actions: {
     async signup(username, email, password) {

@@ -22,6 +22,16 @@
                 <input type="password" v-model="password" class="form-control" id="inputPassword" required/>
                 <small class="form-text text-danger">Required</small>
               </section>
+              <section class="mb-3">
+                <label for="inputFirstName" class="form-label">First Name</label>
+                <input id="inputFirstName" type="text" v-model="username" class="form-control" required/>
+                <small class="form-text text-danger">Required</small>
+              </section>
+              <section class="mb-3">
+                <label for="inputLastName" class="form-label">Last Name</label>
+                <input id="inputLastName" type="text" v-model="username" class="form-control" required/>
+                <small class="form-text text-danger">Required</small>
+              </section>
               <button type="button" class="btn btn-primary" @click="signup">Signup</button>
             </form>
           </section>
