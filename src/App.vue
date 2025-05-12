@@ -4,6 +4,7 @@
       <RouterLink to="/" class="navbar-brand">Benevolent Bank</RouterLink>
       <div class="navbar-nav ms-auto">
         <template v-if="isLoggedIn">
+          <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
           <button class="nav-item nav-link btn btn-link" @click="logout">Logout</button>
         </template>
         <template v-else>

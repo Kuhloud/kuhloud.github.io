@@ -10,6 +10,7 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import Login from "@/components/registration/Login.vue";
 import Signup from "@/components/registration/Signup.vue";
+import Transfer from "@/components/Transfer.vue";
 
 // Initialize auth token if it exists
 const token = getAuthToken();
@@ -30,6 +31,10 @@ const routes = [
     path: "/signup",
     component: Signup,
   },
+  {
+    path: "/transfer",
+    component: Transfer,
+  }
 ];
 
 const router = createRouter({
