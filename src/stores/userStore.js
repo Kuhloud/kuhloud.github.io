@@ -5,11 +5,15 @@ export const userStore = defineStore('store', {
   state: () => ({
     token: '',
     user_id: 0,
-    username: '',
-    role: ''
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
+    role: '',
+    username: ''
   }),
   getters: {
-    isLoggedIn: (state) => state.token != '',
+    isLoggedIn: (state) => state.user_id != '',
     getUserId: (state) => state.user_id,
     // getRole: (state) => state.role,
     isEmployee: (state) => state.role == 'RULE_EMPLOYEE',
@@ -27,7 +31,8 @@ export const userStore = defineStore('store', {
           password: password,
           bsn: bsn
         })
-        // await this.setUserData(res.data)
+        console.log('Response from signup:', res.data)
+        await this.setUserData(res.data)
         // await this.getUserRole()
         return Promise.resolve()
       } catch (error) {
@@ -61,11 +66,20 @@ export const userStore = defineStore('store', {
     //   })
     // },
     async setUserData(response) {
-      localStorage.setItem('token', response.token)
-      localStorage.setItem('user_id', response.user_id)
-      localStorage.setItem('username', response.username)
+      //localStorage.setItem('token', response.token)
+      localStorage.setItem('user_id', response.id)
+      localStorage.setItem('firstName', response.firstName)
+      localStorage.setItem('lastName', response.lastName)
+      localStorage.setItem('email', response.email)
+      localStorage.setItem('phoneNumber', response.phoneNumber)
+      localStorage.setItem('role', response.role)
       this.token = response.token
       this.user_id = response.user_id
+      this.firstName = response.firstName
+      this.lastName = response.lastName
+      this.email = response.email
+      this.phoneNumber = response.phoneNumber
+      this.role = response.role
       this.username = response.username
     },
     autologin() {
@@ -91,11 +105,20 @@ export const userStore = defineStore('store', {
     logout() {
       this.token = ''
       this.user_id = 0
+      this.firstName = ''
+      this.lastName = ''
+      this.email = ''
+      this.phoneNumber = ''
+      this.role = ''
       this.username = ''
       localStorage.removeItem('token')
       localStorage.removeItem('user_id')
-      localStorage.removeItem('username')
+      localStorage.removeItem('firstName')
+      localStorage.removeItem('lastName')
+      localStorage.removeItem('email')
+      localStorage.removeItem('phoneNumber')
       localStorage.removeItem('role')
+      localStorage.removeItem('username')
       axios.defaults.headers.common['Authorization'] = ''
     }
   }
