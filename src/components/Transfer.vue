@@ -88,23 +88,36 @@
 </template>
 
 <script>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
+import axios from "axios"; // Ensure axios is installed and imported
 
 export default {
   setup() {
-    // Mock data for bank accounts
-    const accounts = ref([
-      { id: 1, name: "Savings Account", balance: 5000 },
-      { id: 2, name: "Checking Account", balance: 1500 },
-    ]);
-
-    // Form fields
+    const accounts = ref([]); // Store the user's bank accounts
     const transferType = ref("own"); // Default to transferring between own accounts
     const selectedAccount = ref(null);
     const toAccount = ref(null);
     const toIban = ref("");
     const amount = ref("");
     const description = ref("");
+
+    // Fetch accounts from the backend
+    const fetchAccounts = async () => {
+      const userId = localStorage.getItem("user_id"); // Get the logged-in user's ID from localStorage
+      if (!userId) {
+        alert("User is not logged in.");
+        return;
+      }
+
+      try {
+        const response = await axios.get(`http://localhost:8080/accounts/${userId}`);
+        accounts.value = response.data; // Populate the accounts array with the response
+      } catch (error) {
+        console.error("Error fetching accounts:", error);
+        alert("Failed to fetch accounts. Please try again later.");
+      }
+      console.log("Accounts fetched:", accounts.value);
+    };
 
     // Submit transfer function
     const submitTransfer = () => {
@@ -146,6 +159,9 @@ export default {
       amount.value = "";
       description.value = "";
     };
+
+    // Fetch accounts when the component is mounted
+    onMounted(fetchAccounts);
 
     return {
       accounts,

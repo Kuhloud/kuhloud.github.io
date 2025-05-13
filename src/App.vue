@@ -25,10 +25,12 @@
 <script>
 import { computed } from "vue";
 import { userStore } from "@/stores/userStore"; // Adjust the path based on your project structure
+import { useRouter } from "vue-router";
 
 export default {
   setup() {
     const store = userStore();
+    const router = useRouter();
 
     // Use the reactive isLoggedIn getter from the store
     const isLoggedIn = computed(() => store.isLoggedIn);
@@ -36,6 +38,7 @@ export default {
     // Use the logout function from the store
     const logout = () => {
       store.logout(); // Call the store's logout function
+      router.push("/"); // Redirect to the login page after logout
     };
 
     return {
