@@ -9,10 +9,11 @@ export const userStore = defineStore('store', {
     lastName: '',
     email: '',
     phoneNumber: '',
-    role: ''
+    role: '',
+    username: ''
   }),
   getters: {
-    isLoggedIn: (state) => state.token != '',
+    isLoggedIn: (state) => state.user_id != '',
     getUserId: (state) => state.user_id,
     // getRole: (state) => state.role,
     isEmployee: (state) => state.role == 'RULE_EMPLOYEE',
@@ -33,6 +34,7 @@ export const userStore = defineStore('store', {
           password: password,
           bsn: bsn
         })
+        console.log('Response from signup:', res.data)
         await this.setUserData(res.data)
         // await this.getUserRole()
         return Promise.resolve()
@@ -70,7 +72,7 @@ export const userStore = defineStore('store', {
     //   })
     // },
     async setUserData(response) {
-      // localStorage.setItem('token', response.token)
+      //localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.id)
       localStorage.setItem('firstName', response.firstName)
       localStorage.setItem('lastName', response.lastName)
@@ -84,6 +86,7 @@ export const userStore = defineStore('store', {
       this.email = response.email
       this.phoneNumber = response.phoneNumber
       this.role = response.role
+      this.username = response.username
     },
     autologin() {
       if (localStorage['token']) {
@@ -116,14 +119,16 @@ export const userStore = defineStore('store', {
       this.email = ''
       this.phoneNumber = ''
       this.role = ''
-      // localStorage.removeItem('token')
+      this.username = ''
+      localStorage.removeItem('token')
       localStorage.removeItem('user_id')
       localStorage.removeItem('firstName')
       localStorage.removeItem('lastName')
       localStorage.removeItem('email')
       localStorage.removeItem('phoneNumber')
       localStorage.removeItem('role')
-      //axios.defaults.headers.common['Authorization'] = ''
+      localStorage.removeItem('username')
+      axios.defaults.headers.common['Authorization'] = ''
     }
   }
 })
