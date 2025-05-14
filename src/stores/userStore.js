@@ -3,9 +3,12 @@ import { defineStore } from 'pinia'
 
 export const userStore = defineStore('store', {
   state: () => ({
-    token: '',
+    // token: '',
     user_id: 0,
-    username: '',
+    firstName: '',
+    lastName: '',
+    email: '',
+    phoneNumber: '',
     role: ''
   }),
   getters: {
@@ -20,6 +23,9 @@ export const userStore = defineStore('store', {
       const sanitizedLastName = lastName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedEmail = email.trim().toLowerCase()
       try {
+        if (!this.validateInput(sanitizedEmail)) {
+          return Promise.reject(new Error(this.errorMessage))
+        }
         const res = await axios.post('/users/signup', {
           firstName: sanitizedFirstName,
           lastName: sanitizedLastName,
@@ -27,7 +33,7 @@ export const userStore = defineStore('store', {
           password: password,
           bsn: bsn
         })
-        // await this.setUserData(res.data)
+        await this.setUserData(res.data)
         // await this.getUserRole()
         return Promise.resolve()
       } catch (error) {
@@ -37,12 +43,15 @@ export const userStore = defineStore('store', {
     async login(email, password) {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
+        if (!this.validateInput(sanitizedEmail)) {
+          return Promise.reject(new Error(this.errorMessage))
+        }
         const res = await axios.post('/users/login', {
           email: sanitizedEmail,
           password: password
         })
         await this.setUserData(res.data)
-        // await this.getUserRole()
+        //await this.getUserRole()
         return Promise.resolve()
       } catch (error) {
         return Promise.reject(error)
@@ -61,42 +70,60 @@ export const userStore = defineStore('store', {
     //   })
     // },
     async setUserData(response) {
-      localStorage.setItem('token', response.token)
-      localStorage.setItem('user_id', response.user_id)
-      localStorage.setItem('username', response.username)
+      // localStorage.setItem('token', response.token)
+      localStorage.setItem('user_id', response.id)
+      localStorage.setItem('firstName', response.firstName)
+      localStorage.setItem('lastName', response.lastName)
+      localStorage.setItem('email', response.email)
+      localStorage.setItem('phoneNumber', response.phoneNumber)
+      localStorage.setItem('role', response.role)
       this.token = response.token
       this.user_id = response.user_id
-      this.username = response.username
+      this.firstName = response.firstName
+      this.lastName = response.lastName
+      this.email = response.email
+      this.phoneNumber = response.phoneNumber
+      this.role = response.role
     },
     autologin() {
       if (localStorage['token']) {
         try {
-          this.token = localStorage.getItem('token')
+          // this.token = localStorage.getItem('token')
           this.user_id = localStorage.getItem('user_id')
-          this.username = localStorage.getItem('username')
+          this.firstName = localStorage.getItem('firstName')
+          this.lastName = localStorage.getItem('lastName')
+          this.email = localStorage.getItem('email')
+          this.phoneNumber = localStorage.getItem('phoneNumber')
           this.role = localStorage.getItem('role')
-          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          //axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
         }
       }
     },
     validateInput(email) {
-      if (email != '') {
+      if (email === '') {
         this.errorMessage = 'Please fill in your email address'
         return false
       }
       return true
     },
     logout() {
-      this.token = ''
+      // this.token = ''
       this.user_id = 0
-      this.username = ''
-      localStorage.removeItem('token')
+      this.firstName = ''
+      this.lastName = ''
+      this.email = ''
+      this.phoneNumber = ''
+      this.role = ''
+      // localStorage.removeItem('token')
       localStorage.removeItem('user_id')
-      localStorage.removeItem('username')
+      localStorage.removeItem('firstName')
+      localStorage.removeItem('lastName')
+      localStorage.removeItem('email')
+      localStorage.removeItem('phoneNumber')
       localStorage.removeItem('role')
-      axios.defaults.headers.common['Authorization'] = ''
+      //axios.defaults.headers.common['Authorization'] = ''
     }
   }
 })
