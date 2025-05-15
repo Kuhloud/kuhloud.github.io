@@ -100,6 +100,7 @@ export default {
     const toIban = ref("");
     const amount = ref("");
     const description = ref("");
+    const userId = localStorage.getItem("user_id");
 
     // Fetch accounts from the backend
     const fetchAccounts = async () => {
