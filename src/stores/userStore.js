@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 
 export const userStore = defineStore('store', {
   state: () => ({
-    token: '',
+    // token: '',
     user_id: 0,
     firstName: '',
     lastName: '',
@@ -24,6 +24,9 @@ export const userStore = defineStore('store', {
       const sanitizedLastName = lastName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedEmail = email.trim().toLowerCase()
       try {
+        if (!this.validateInput(sanitizedEmail)) {
+          return Promise.reject(new Error(this.errorMessage))
+        }
         const res = await axios.post('/users/signup', {
           firstName: sanitizedFirstName,
           lastName: sanitizedLastName,
@@ -42,12 +45,15 @@ export const userStore = defineStore('store', {
     async login(email, password) {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
+        if (!this.validateInput(sanitizedEmail)) {
+          return Promise.reject(new Error(this.errorMessage))
+        }
         const res = await axios.post('/users/login', {
           email: sanitizedEmail,
           password: password
         })
         await this.setUserData(res.data)
-        // await this.getUserRole()
+        //await this.getUserRole()
         return Promise.resolve()
       } catch (error) {
         return Promise.reject(error)
@@ -85,25 +91,28 @@ export const userStore = defineStore('store', {
     autologin() {
       if (localStorage['token']) {
         try {
-          this.token = localStorage.getItem('token')
+          // this.token = localStorage.getItem('token')
           this.user_id = localStorage.getItem('user_id')
-          this.username = localStorage.getItem('username')
+          this.firstName = localStorage.getItem('firstName')
+          this.lastName = localStorage.getItem('lastName')
+          this.email = localStorage.getItem('email')
+          this.phoneNumber = localStorage.getItem('phoneNumber')
           this.role = localStorage.getItem('role')
-          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          //axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
         }
       }
     },
     validateInput(email) {
-      if (email != '') {
+      if (email === '') {
         this.errorMessage = 'Please fill in your email address'
         return false
       }
       return true
     },
     logout() {
-      this.token = ''
+      // this.token = ''
       this.user_id = 0
       this.firstName = ''
       this.lastName = ''
