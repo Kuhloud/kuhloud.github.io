@@ -121,45 +121,54 @@ export default {
     };
 
     // Submit transfer function
-    const submitTransfer = () => {
-      if (!selectedAccount.value) {
-        alert("Please select an account to transfer from.");
-        return;
-      }
-      if (transferType.value === "own" && !toAccount.value) {
-        alert("Please select an account to transfer to.");
-        return;
-      }
-      if (transferType.value === "external" && !toIban.value) {
-        alert("Please enter the recipient's IBAN.");
-        return;
-      }
-      if (!amount.value || amount.value <= 0) {
-        alert("Amount must be greater than zero.");
-        return;
-      }
-      if (!description.value) {
-        alert("Please enter a description.");
-        return;
-      }
+  const submitTransfer = async () => {
+    if (!selectedAccount.value) {
+      alert("Please select an account to transfer from.");
+      return;
+    }
+    if (transferType.value === "own" && !toAccount.value) {
+      alert("Please select an account to transfer to.");
+      return;
+    }
+    if (transferType.value === "external" && !toIban.value) {
+      alert("Please enter the recipient's IBAN.");
+      return;
+    }
+    if (!amount.value || amount.value <= 0) {
+      alert("Amount must be greater than zero.");
+      return;
+    }
+    if (!description.value) {
+      alert("Please enter a description.");
+      return;
+    }
 
-      // Mock transfer logic
-      if (transferType.value === "own") {
-        alert(
-          `Transfer of ${amount.value} € from ${selectedAccount.value.name} to ${toAccount.value.name} with description "${description.value}" has been submitted.`
-        );
-      } else {
-        alert(
-          `Transfer of ${amount.value} € from ${selectedAccount.value.name} to IBAN ${toIban.value} with description "${description.value}" has been submitted.`
-        );
-      }
+    // Construct transaction payload
+    const payload = {
+      fromAccount: { iban: selectedAccount.value.iban }, // <-- send IBAN here
+      toAccount: transferType.value === "own" 
+                ? { iban: toAccount.value.iban }         // <-- IBAN for own transfer
+                : { iban: toIban.value },                 // <-- IBAN for external
+      amount: parseFloat(amount.value),
+      description: description.value,
+      date: new Date().toISOString(),
+      userInitiatingTransfer: { id: parseInt(userId) } // assuming you keep this as ID
+    };
 
+    try {
+      const response = await axios.post('http://localhost:8080/transactions/create', payload);
+      alert('Transfer successful!');
       // Reset form
       toAccount.value = null;
       toIban.value = "";
       amount.value = "";
       description.value = "";
-    };
+    } catch (error) {
+      console.error('Error creating transaction:', error);
+      alert('Failed to make transfer. Please try again.');
+    }
+  };
+
 
     // Fetch accounts when the component is mounted
     onMounted(fetchAccounts);
