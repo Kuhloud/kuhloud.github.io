@@ -106,7 +106,7 @@ export default {
     const fetchAccounts = async () => {
       const userId = localStorage.getItem("user_id"); // Get the logged-in user's ID from localStorage
       if (!userId) {
-        alert("User is not logged in.");
+        router.push("/login");
         return;
       }
 

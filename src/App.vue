@@ -31,7 +31,7 @@ export default {
   setup() {
     const store = userStore();
     const router = useRouter();
-
+    store.autologin()
     // Use the reactive isLoggedIn getter from the store
     const isLoggedIn = computed(() => store.isLoggedIn);
 

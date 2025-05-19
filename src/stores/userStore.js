@@ -3,20 +3,20 @@ import { defineStore } from 'pinia'
 
 export const userStore = defineStore('store', {
   state: () => ({
-    // token: '',
+    token: '',
     user_id: 0,
-    firstName: '',
-    lastName: '',
-    email: '',
-    phoneNumber: '',
-    role: '',
-    username: ''
+    // firstName: '',
+    // lastName: '',
+    // email: '',
+    // phoneNumber: '',
+    role: ''
+    // username: ''
   }),
   getters: {
-    isLoggedIn: (state) => state.user_id != '',
+    isLoggedIn: (state) => Boolean(state.token),
     getUserId: (state) => state.user_id,
     // getRole: (state) => state.role,
-    isEmployee: (state) => state.role == 'RULE_EMPLOYEE',
+    isEmployee: (state) => state.role === 'ROLE_EMPLOYEE',
   },
   actions: {
     async signup(firstName, lastName, email, password, bsn) {
@@ -52,6 +52,7 @@ export const userStore = defineStore('store', {
           email: sanitizedEmail,
           password: password
         })
+        console.log('Response from login:', res.data)
         await this.setUserData(res.data)
         //await this.getUserRole()
         return Promise.resolve()
@@ -72,33 +73,33 @@ export const userStore = defineStore('store', {
     //   })
     // },
     async setUserData(response) {
-      //localStorage.setItem('token', response.token)
+      localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.id)
-      localStorage.setItem('firstName', response.firstName)
-      localStorage.setItem('lastName', response.lastName)
-      localStorage.setItem('email', response.email)
-      localStorage.setItem('phoneNumber', response.phoneNumber)
+      // localStorage.setItem('firstName', response.firstName)
+      // localStorage.setItem('lastName', response.lastName)
+      // localStorage.setItem('email', response.email)
+      // localStorage.setItem('phoneNumber', response.phoneNumber)
       localStorage.setItem('role', response.role)
       this.token = response.token
-      this.user_id = response.user_id
-      this.firstName = response.firstName
-      this.lastName = response.lastName
-      this.email = response.email
-      this.phoneNumber = response.phoneNumber
+      this.user_id = response.id
+      // this.firstName = response.firstName
+      // this.lastName = response.lastName
+      // this.email = response.email
+      // this.phoneNumber = response.phoneNumber
       this.role = response.role
-      this.username = response.username
+      // this.username = response.username
     },
     autologin() {
       if (localStorage['token']) {
         try {
-          // this.token = localStorage.getItem('token')
+          this.token = localStorage.getItem('token')
           this.user_id = localStorage.getItem('user_id')
-          this.firstName = localStorage.getItem('firstName')
-          this.lastName = localStorage.getItem('lastName')
-          this.email = localStorage.getItem('email')
-          this.phoneNumber = localStorage.getItem('phoneNumber')
+          // this.firstName = localStorage.getItem('firstName')
+          // this.lastName = localStorage.getItem('lastName')
+          // this.email = localStorage.getItem('email')
+          // this.phoneNumber = localStorage.getItem('phoneNumber')
           this.role = localStorage.getItem('role')
-          //axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
         }
@@ -112,22 +113,22 @@ export const userStore = defineStore('store', {
       return true
     },
     logout() {
-      // this.token = ''
+      this.token = ''
       this.user_id = 0
-      this.firstName = ''
-      this.lastName = ''
-      this.email = ''
-      this.phoneNumber = ''
+      // this.firstName = ''
+      // this.lastName = ''
+      // this.email = ''
+      // this.phoneNumber = ''
       this.role = ''
-      this.username = ''
+      // this.username = ''
       localStorage.removeItem('token')
       localStorage.removeItem('user_id')
-      localStorage.removeItem('firstName')
-      localStorage.removeItem('lastName')
-      localStorage.removeItem('email')
-      localStorage.removeItem('phoneNumber')
+      // localStorage.removeItem('firstName')
+      // localStorage.removeItem('lastName')
+      // localStorage.removeItem('email')
+      // localStorage.removeItem('phoneNumber')
       localStorage.removeItem('role')
-      localStorage.removeItem('username')
+      // localStorage.removeItem('username')
       axios.defaults.headers.common['Authorization'] = ''
     }
   }
