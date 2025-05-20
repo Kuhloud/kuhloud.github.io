@@ -5,6 +5,7 @@
       <div class="navbar-nav ms-auto">
         <template v-if="isLoggedIn">
           <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/users">Users</RouterLink>
           <button class="nav-item nav-link btn btn-link" @click="logout">Logout</button>
         </template>
         <template v-else>
