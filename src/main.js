@@ -11,6 +11,7 @@ import App from "./App.vue";
 import Login from "@/components/registration/Login.vue";
 import Signup from "@/components/registration/Signup.vue";
 import Transfer from "@/components/Transfer.vue";
+import TransferHistory from "@/components/TransferHistory.vue";
 
 // Initialize auth token if it exists
 const token = getAuthToken();
@@ -34,6 +35,10 @@ const routes = [
   {
     path: "/transfer",
     component: Transfer,
+  },
+  {
+    path: "/transfer/history",
+    component: TransferHistory,
   }
 ];
 

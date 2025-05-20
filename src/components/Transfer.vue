@@ -1,6 +1,14 @@
 <template>
   <div class="transfer-container">
+    <router-link to="/transfer/history" class="btn btn-primary" style="margin-bottom: 20px;">
+      To Transfer History → 
+    </router-link>
     <h1>Transfer Money</h1>
+
+    <!-- Message Box -->
+    <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger']" role="alert">
+      {{ message }}
+    </div>
 
     <!-- Transfer Type Toggle -->
     <div class="form-group">
@@ -89,12 +97,14 @@
 
 <script>
 import { ref, onMounted } from "vue";
-import axios from "axios"; // Ensure axios is installed and imported
+import { useAccountStore } from "@/stores/accountStore";
+import { useTransactionStore } from "@/stores/transactionStore";
 
 export default {
   setup() {
-    const accounts = ref([]); // Store the user's bank accounts
-    const transferType = ref("own"); // Default to transferring between own accounts
+    const accountStore = useAccountStore();
+    const transactionStore = useTransactionStore();
+    const transferType = ref("own");
     const selectedAccount = ref(null);
     const toAccount = ref(null);
     const toIban = ref("");
@@ -102,79 +112,78 @@ export default {
     const description = ref("");
     const userId = localStorage.getItem("user_id");
 
-    // Fetch accounts from the backend
-    const fetchAccounts = async () => {
-      const userId = localStorage.getItem("user_id"); // Get the logged-in user's ID from localStorage
-      if (!userId) {
-        router.push("/login");
+    // Message state
+    const message = ref("");
+    const messageType = ref("success"); // 'success' or 'danger'
+
+    onMounted(() => {
+      if (userId) {
+        accountStore.fetchAccounts(userId);
+      }
+    });
+
+    const showMessage = (msg, type = "danger") => {
+      message.value = msg;
+      messageType.value = type;
+      setTimeout(() => {
+        message.value = "";
+      }, 4000);
+    };
+
+    const submitTransfer = async () => {
+      const token = localStorage.getItem("token");
+      if (!selectedAccount.value) {
+        showMessage("Please select an account to transfer from.");
+        return;
+      }
+      if (transferType.value === "own" && !toAccount.value) {
+        showMessage("Please select an account to transfer to.");
+        return;
+      }
+      if (transferType.value === "external" && !toIban.value) {
+        showMessage("Please enter the recipient's IBAN.");
+        return;
+      }
+      if (!amount.value || amount.value <= 0) {
+        showMessage("Amount must be greater than zero.");
+        return;
+      }
+      if (!description.value) {
+        showMessage("Please enter a description.");
         return;
       }
 
-      try {
-        const response = await axios.get(`http://localhost:8080/accounts/${userId}`);
-        accounts.value = response.data; // Populate the accounts array with the response
-      } catch (error) {
-        console.error("Error fetching accounts:", error);
-        alert("Failed to fetch accounts. Please try again later.");
+      const payload = {
+        fromAccount: { iban: selectedAccount.value.iban },
+        toAccount:
+          transferType.value === "own"
+            ? { iban: toAccount.value.iban }
+            : { iban: toIban.value },
+        amount: parseFloat(amount.value),
+        description: description.value,
+        date: new Date().toISOString(),
+        userInitiatingTransfer: { id: parseInt(userId) },
+      };
+
+      const success = await transactionStore.submitTransfer(payload, token);
+      if (success) {
+        showMessage("Transfer successful!", "success");
+        toAccount.value = null;
+        toIban.value = "";
+        amount.value = "";
+        description.value = "";
+        // Refresh accounts after transfer
+        if (userId) {
+          // Need to look into this, accounts do not refresh
+          accountStore.fetchAccounts(userId);
+        }
+      } else {
+        showMessage("Failed to make transfer. Please try again.");
       }
-      console.log("Accounts fetched:", accounts.value);
     };
-
-    // Submit transfer function
-  const submitTransfer = async () => {
-    if (!selectedAccount.value) {
-      alert("Please select an account to transfer from.");
-      return;
-    }
-    if (transferType.value === "own" && !toAccount.value) {
-      alert("Please select an account to transfer to.");
-      return;
-    }
-    if (transferType.value === "external" && !toIban.value) {
-      alert("Please enter the recipient's IBAN.");
-      return;
-    }
-    if (!amount.value || amount.value <= 0) {
-      alert("Amount must be greater than zero.");
-      return;
-    }
-    if (!description.value) {
-      alert("Please enter a description.");
-      return;
-    }
-
-    // Construct transaction payload
-    const payload = {
-      fromAccount: { iban: selectedAccount.value.iban }, // <-- send IBAN here
-      toAccount: transferType.value === "own" 
-                ? { iban: toAccount.value.iban }         // <-- IBAN for own transfer
-                : { iban: toIban.value },                 // <-- IBAN for external
-      amount: parseFloat(amount.value),
-      description: description.value,
-      date: new Date().toISOString(),
-      userInitiatingTransfer: { id: parseInt(userId) } // assuming you keep this as ID
-    };
-
-    try {
-      const response = await axios.post('http://localhost:8080/transactions/create', payload);
-      alert('Transfer successful!');
-      // Reset form
-      toAccount.value = null;
-      toIban.value = "";
-      amount.value = "";
-      description.value = "";
-    } catch (error) {
-      console.error('Error creating transaction:', error);
-      alert('Failed to make transfer. Please try again.');
-    }
-  };
-
-
-    // Fetch accounts when the component is mounted
-    onMounted(fetchAccounts);
 
     return {
-      accounts,
+      accounts: accountStore.accounts,
       transferType,
       selectedAccount,
       toAccount,
@@ -182,6 +191,10 @@ export default {
       amount,
       description,
       submitTransfer,
+      loading: accountStore.loading || transactionStore.loading,
+      error: accountStore.error || transactionStore.error,
+      message,
+      messageType,
     };
   },
 };
@@ -223,5 +236,21 @@ button {
 
 label input[type="radio"] {
   margin-right: 5px;
+}
+
+.alert {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 4px;
+}
+
+.alert-success {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.alert-danger {
+  background-color: #f8d7da;
+  color: #721c24;
 }
 </style>
