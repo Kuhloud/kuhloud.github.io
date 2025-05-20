@@ -163,5 +163,3 @@ const filteredIncoming = computed(() =>
   transactionStore.transactions.filter(tx => applyFilters(tx, "in"))
 );
 </script>
-
-<!-- No extra styles needed, Bootstrap handles the layout -->
