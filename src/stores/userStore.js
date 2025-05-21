@@ -112,6 +112,32 @@ export const userStore = defineStore('store', {
       }
       return true
     },
+    getAllUnapprovedUsers(page, limit) {
+               const offset = (page - 1) * limit;
+                return new Promise((resolve, reject) => {
+                    axios.get('/users/inactive',
+                        {
+                            params: {
+                                approved: false,
+                                offset: offset,
+                                limit: limit,
+                            }
+                        })
+                        .then(result => {
+                            resolve(result.data);
+                        })
+                        .catch(error => reject(error.response));
+                });
+            },
+               approveUser(id) {
+                return new Promise((resolve, reject) => {
+                    axios.post(`/users/${id}/activateuser`)
+                        .then(result => {
+                            resolve(result.data);
+                        })
+                        .catch(error => reject(error.response));
+                });
+            },
     logout() {
       this.token = ''
       this.user_id = 0

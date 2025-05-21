@@ -11,8 +11,10 @@ import App from "./App.vue";
 import Login from "@/components/registration/Login.vue";
 import Signup from "@/components/registration/Signup.vue";
 import Transfer from "@/components/Transfer.vue";
+
 import TransferHistory from "@/components/TransferHistory.vue";
 
+import User from "@/components/User.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -37,8 +39,14 @@ const routes = [
     component: Transfer,
   },
   {
+
     path: "/transfer/history",
     component: TransferHistory,
+
+  },
+  {
+    path: "/users",
+    component: User,
   }
 ];
 
