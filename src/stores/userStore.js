@@ -33,7 +33,7 @@ export const userStore = defineStore('store', {
           password: password,
           bsn: bsn
         })
-        console.log('Response from signup:', res.data)
+        //console.log('Response from signup:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
@@ -50,7 +50,7 @@ export const userStore = defineStore('store', {
           email: sanitizedEmail,
           password: password
         })
-        console.log('Response from login:', res.data)
+        //console.log('Response from login:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
