@@ -131,7 +131,7 @@ export const userStore = defineStore('store', {
             },
                approveUser(id) {
                 return new Promise((resolve, reject) => {
-                    axios.post(`/users/${id}/approve`)
+                    axios.post(`/users/${id}/activateuser`)
                         .then(result => {
                             resolve(result.data);
                         })
