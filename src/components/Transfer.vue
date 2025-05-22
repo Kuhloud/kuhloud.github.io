@@ -96,7 +96,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useTransactionStore } from "@/stores/transactionStore";
 
@@ -172,10 +172,12 @@ export default {
         toIban.value = "";
         amount.value = "";
         description.value = "";
-        // Refresh accounts after transfer
+        // Refresh accounts after transfer and reset selection
         if (userId) {
-          // Need to look into this, accounts do not refresh
-          accountStore.fetchAccounts(userId);
+          await accountStore.fetchAccounts(userId);
+          selectedAccount.value = null;
+          toAccount.value = null;
+          console.log("Accounts after transfer:", accountStore.accounts);
         }
       } else {
         showMessage("Failed to make transfer. Please try again.");
@@ -183,7 +185,7 @@ export default {
     };
 
     return {
-      accounts: accountStore.accounts,
+      accounts: computed(() => accountStore.accounts),
       transferType,
       selectedAccount,
       toAccount,
