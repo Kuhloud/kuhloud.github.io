@@ -12,7 +12,14 @@ export const useAccountStore = defineStore('account', () => {
     loading.value = true
     error.value = null
     try {
-      const response = await axios.get(`http://localhost:8080/accounts/${userId}`)
+      //console.log('fetching accounts')
+      const response = await axios.get(`http://localhost:8080/accounts/${userId}`, { withCredentials: true },
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('token')}`,
+            },
+          })
+      //console.log('accounts fetched:', response.data)
       accounts.value = response.data
     } catch (err) {
       error.value = err

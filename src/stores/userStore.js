@@ -50,7 +50,7 @@ export const userStore = defineStore('store', {
           email: sanitizedEmail,
           password: password
         })
-        //console.log('Response from login:', res.data)
+        console.log('Response from login:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
@@ -76,6 +76,7 @@ export const userStore = defineStore('store', {
       this.token = response.token
       this.user_id = response.id
       this.role = response.role
+      axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`; // ✅ Required
     },
     autologin() {
       if (localStorage['token']) {
