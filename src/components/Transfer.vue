@@ -99,6 +99,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import { useTransactionStore } from "@/stores/transactionStore";
+import axios from "axios";
 
 export default {
   setup() {
@@ -118,6 +119,9 @@ export default {
 
     onMounted(() => {
       if (userId) {
+        console.log('fetchAccounts called with userId:', userId)
+        console.log("Current axios defaults:", axios.defaults.headers.common)
+        console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
         accountStore.fetchAccounts(userId);
       }
     });

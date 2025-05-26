@@ -39,7 +39,7 @@ export default {
     // Use the logout function from the store
     const logout = () => {
       store.logout(); // Call the store's logout function
-      router.push("/"); // Redirect to the login page after logout
+      router.replace("/"); // Redirect to the login page after logout
     };
 
     return {

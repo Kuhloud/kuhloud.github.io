@@ -26,7 +26,7 @@
 </template>
 
 <script>
-import { userStore } from '../../stores/userStore'
+import { userStore } from '@/stores/userStore.js'
 
 export default {
   name: 'LoginComponent',
@@ -42,10 +42,11 @@ export default {
     }
   },
   methods: {
-    login() {
-      this.store
+    async login() {
+      await this.store
         .login(this.email, this.password)
         .then(() => {
+          //console.log('Token after login:', this.store.token)
           this.$router.replace('/')
         })
         .catch((error) => (this.errorMessage = error))

@@ -1,5 +1,6 @@
 import axios from '../axios-auth'
 import { defineStore } from 'pinia'
+import {setAuthToken} from "@/utils/auth.js";
 
 export const userStore = defineStore('store', {
   state: () => ({
@@ -76,7 +77,7 @@ export const userStore = defineStore('store', {
       this.token = response.token
       this.user_id = response.id
       this.role = response.role
-      axios.defaults.headers.common['Authorization'] = `Bearer ${response.token}`; // ✅ Required
+      setAuthToken(response.token)
     },
     autologin() {
       if (localStorage['token']) {
@@ -84,7 +85,7 @@ export const userStore = defineStore('store', {
           this.token = localStorage.getItem('token')
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
-          axios.defaults.headers.common['Authorization'] = `Bearer ${this.token}`
+          console.log('Token still active');
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
         }

@@ -79,10 +79,10 @@
       bsnIsAllNumeric(bsn) {
         return /^\d+$/.test(bsn);
       },
-      signup() {
+     async signup() {
         this.validatePassword()
         this.bsnIsAllNumeric(this.bsn)
-        this.store
+        await this.store
           .signup(this.firstName, this.lastName, this.email, this.password, this.bsn)
           .then(() => {
             this.$router.replace('/')

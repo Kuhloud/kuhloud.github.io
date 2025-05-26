@@ -14,11 +14,6 @@ export const useTransactionStore = defineStore('transaction', () => {
       await axios.post(
         "http://localhost:8080/transactions/create",
         payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
       )
       return true
     } catch (err) {
