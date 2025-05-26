@@ -11,6 +11,7 @@ import App from "./App.vue";
 import Login from "@/components/registration/Login.vue";
 import Signup from "@/components/registration/Signup.vue";
 import Transfer from "@/components/Transfer.vue";
+import MockATM from "@/components/MockATM.vue";
 
 import TransferHistory from "@/components/TransferHistory.vue";
 
@@ -47,6 +48,10 @@ const routes = [
   {
     path: "/users",
     component: User,
+  },
+  {
+    path: "/mockATM",
+    component: MockATM,
   }
 ];
 
