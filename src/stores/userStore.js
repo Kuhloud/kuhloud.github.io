@@ -10,12 +10,12 @@ export const userStore = defineStore('store', {
     // lastName: '',
     // email: '',
     // phoneNumber: '',
-    role: ''
-
+    role: '',
+    user: null,
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
-    getUserId: (state) => state.user_id,
+    //getUserId: (state) => state.user_id,
     isEmployee: (state) => state.role === 'ROLE_EMPLOYEE',
   },
   actions: {
@@ -85,6 +85,7 @@ export const userStore = defineStore('store', {
           this.token = localStorage.getItem('token')
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
+          setAuthToken(this.token)
           console.log('Token still active');
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
@@ -124,6 +125,36 @@ export const userStore = defineStore('store', {
                         .catch(error => reject(error.response));
                 });
             },
+    async getUserInfo(user_id) {
+      const token = localStorage.getItem('token');
+      try {
+        const response = await axios.get(`/users/${user_id}`, {
+          headers: {
+            Authorization: `Bearer ${token}` // ✅ Attach token
+          },
+          withCredentials: true // ✅ Send cookies (if needed)
+        });
+        console.log('User fetched:', response.data);
+        this.user = response.data;
+        console.log('User accounts:', this.user.accounts);
+      } catch (error) {
+        console.error('Error fetching user:', error.response || error);
+        throw error; // ✅ Throw the full error for debugging
+      }
+    },
+    // async getUserInfo(user_id) {
+    //   const token = localStorage.getItem('token');
+    //   return axios.get(`/users/${user_id}`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`
+    //     }
+    //   })
+    //       .then(result => result.data)
+    //       .catch(error => {
+    //         console.error('Failed to fetch user info:', error.response || error);
+    //         throw error;
+    //       });
+    // },
     logout() {
       this.token = ''
       this.user_id = 0

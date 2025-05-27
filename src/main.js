@@ -15,6 +15,7 @@ import Transfer from "@/components/Transfer.vue";
 import TransferHistory from "@/components/TransferHistory.vue";
 
 import User from "@/components/User.vue";
+import Profile from "@/components/profile/Profile.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -47,6 +48,10 @@ const routes = [
   {
     path: "/users",
     component: User,
+  },
+  {
+    path: "/profile",
+    component: Profile,
   }
 ];
 
