@@ -1,6 +1,7 @@
 import axios from '../axios-auth'
 import { defineStore } from 'pinia'
 import {setAuthToken} from "@/utils/auth.js";
+import {getAuthToken} from "@/utils/auth.js";
 
 export const userStore = defineStore('store', {
   state: () => ({
@@ -82,7 +83,7 @@ export const userStore = defineStore('store', {
     autologin() {
       if (localStorage['token']) {
         try {
-          this.token = localStorage.getItem('token')
+          this.token = getAuthToken();
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
           setAuthToken(this.token)
@@ -126,7 +127,9 @@ export const userStore = defineStore('store', {
                 });
             },
     async getUserInfo(user_id) {
-      const token = localStorage.getItem('token');
+      const token = getAuthToken();
+      console.log("Current axios defaults:", axios.defaults.headers.common)
+      console.log('Authorization header:', getAuthToken())
       try {
         const response = await axios.get(`/users/${user_id}`, {
           headers: {
