@@ -1,7 +1,7 @@
 <template>
   <div class="transfer-container">
-    <router-link to="/transfer/history" class="btn btn-primary" style="margin-bottom: 20px;">
-      To Transfer History → 
+    <router-link to="/transfer/history" class="btn-primary transfer-history-link">
+      To Transfer History →
     </router-link>
     <h1>Transfer Money</h1>
 
@@ -37,7 +37,7 @@
     <div class="form-group">
       <label for="fromAccount">Select Account to Transfer From:</label>
       <select v-model="selectedAccount" id="fromAccount" class="form-control">
-        <option v-for="account in accounts" :key="account.id" :value="account">
+        <option v-for="account in accounts" :key="account.id + '-' + account.balance" :value="account">
           {{ account.name }} - {{ account.balance }} €
         </option>
       </select>
@@ -49,7 +49,7 @@
       <select v-model="toAccount" id="toAccount" class="form-control">
         <option
           v-for="account in accounts"
-          :key="account.id"
+          :key="account.id + '-' + account.balance"
           :value="account"
           :disabled="account.id === selectedAccount?.id"
         >
@@ -91,7 +91,19 @@
     </div>
 
     <!-- Submit Button -->
-    <button @click="submitTransfer" class="btn btn-primary">Transfer</button>
+    <button @click="submitTransfer" class="btn-primary">Transfer</button>
+
+    <div class="transfer-info-section">
+      <h4>How does it work?</h4>
+      <ul>
+        <li>Transfer between your own accounts or to any IBAN in Europe</li>
+        <li>All transfers are instant and secure</li>
+        <li>See your balances update live after each transfer</li>
+      </ul>
+      <p class="transfer-footer-note">
+        Benevolent Bank keeps your money moving, safely and quickly.
+      </p>
+    </div>
   </div>
 </template>
 
@@ -181,7 +193,6 @@ export default {
           await accountStore.fetchAccounts(userId);
           selectedAccount.value = null;
           toAccount.value = null;
-          console.log("Accounts after transfer:", accountStore.accounts);
         }
       } else {
         showMessage("Failed to make transfer. Please try again.");
@@ -209,11 +220,25 @@ export default {
 <style scoped>
 .transfer-container {
   max-width: 600px;
-  margin: 0 auto;
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin: 40px auto;
+  padding: 32px 24px;
+  background: #f4f7fa;
+  border-radius: 16px;
+  box-shadow: 0 4px 24px rgba(60, 80, 120, 0.08);
+  color: #223046;
+  font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+}
+
+.transfer-history-link {
+  display: inline-block;
+  margin-bottom: 20px;
+}
+
+h1 {
+  color: #2a4365;
+  font-size: 2rem;
+  margin-bottom: 1.2rem;
+  text-align: center;
 }
 
 .form-group {
@@ -221,7 +246,7 @@ export default {
 }
 
 label {
-  font-weight: bold;
+  font-weight: 500;
 }
 
 input,
@@ -230,18 +255,27 @@ select {
   width: 100%;
   padding: 10px;
   margin-top: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid #bfc9d9;
   border-radius: 4px;
+  background: #f8fafc;
 }
 
-button {
+.btn-primary {
+  background: #2b6cb0;
+  color: #fff;
+  padding: 10px 22px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background 0.2s;
+  border: none;
+  cursor: pointer;
   width: 100%;
-  padding: 10px;
-  font-size: 16px;
+  margin-top: 8px;
 }
 
-label input[type="radio"] {
-  margin-right: 5px;
+.btn-primary:hover {
+  background: #234e7d;
 }
 
 .alert {
@@ -258,5 +292,30 @@ label input[type="radio"] {
 .alert-danger {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.transfer-info-section {
+  background: #f0f4fa;
+  border-radius: 10px;
+  padding: 24px 20px;
+  margin-top: 24px;
+}
+
+.transfer-info-section h4 {
+  color: #385170;
+  margin-bottom: 12px;
+}
+
+.transfer-info-section ul {
+  color: #42516d;
+  margin-bottom: 14px;
+  padding-left: 20px;
+}
+
+.transfer-footer-note {
+  color: #7b8ba3;
+  font-size: 0.98rem;
+  margin-top: 10px;
+  text-align: center;
 }
 </style>
