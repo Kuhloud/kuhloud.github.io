@@ -80,13 +80,12 @@ export const userStore = defineStore('store', {
       this.role = response.role
       setAuthToken(response.token)
     },
-    autologin() {
+    async autologin() {
       if (localStorage['token']) {
         try {
           this.token = getAuthToken();
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
-          setAuthToken(this.token)
           console.log('Token still active');
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
@@ -133,7 +132,7 @@ export const userStore = defineStore('store', {
       try {
         const response = await axios.get(`/users/${user_id}`, {
           headers: {
-            Authorization: `Bearer ${token}` // ✅ Attach token
+            Authorization: `Bearer ${this.token}` // ✅ Attach token
           },
           withCredentials: true // ✅ Send cookies (if needed)
         });

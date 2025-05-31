@@ -85,81 +85,77 @@
   </div>
 </template>
 
-<script setup>
-import { computed, ref, onMounted } from "vue";
+<script>
+import {ref, onMounted, watch, computed} from "vue"; // Add computed
 import { useTransactionStore } from "@/stores/transactionStore";
 import { useAccountStore } from "@/stores/accountStore";
 
-const transactionStore = useTransactionStore();
-const accountStore = useAccountStore();
-const userId = localStorage.getItem("user_id");
+export default {
+  setup() {
+    const transactionStore = useTransactionStore();
+    const accountStore = useAccountStore();
+    const userId = localStorage.getItem("user_id");
 
-// Filters state
-const filters = ref({
-  startDate: "",
-  endDate: "",
-  fromIban: "",
-  toIban: "",
-  amount: "",
-  amountOperator: "eq",
-});
+    const filters = ref({
+      startDate: "",
+      endDate: "",
+      fromIban: "",
+      toIban: "",
+      amount: "",
+      amountOperator: "eq",
+    });
 
-const resetFilters = () => {
-  filters.value = {
-    startDate: "",
-    endDate: "",
-    fromIban: "",
-    toIban: "",
-    amount: "",
-    amountOperator: "eq",
-  };
-};
+    // Add computed properties for transactions
+    const filteredOutgoing = computed(() => {
+      return transactionStore.transactions.filter(tx =>
+          accountStore.accounts.some(acc => acc.iban === tx.fromAccountIban)
+      );
+    });
 
-// Fetch accounts and transactions on mount
-onMounted(async () => {
-  if (userId) {
-    await accountStore.fetchAccounts(userId);
-    await transactionStore.fetchTransactions(userId);
+    const filteredIncoming = computed(() => {
+      return transactionStore.transactions.filter(tx =>
+          accountStore.accounts.some(acc => acc.iban === tx.toAccountIban)
+      );
+    });
+
+    // Add formatDate function
+    const formatDate = (dateStr) => {
+      return new Date(dateStr).toLocaleDateString();
+    };
+
+    const resetFilters = () => {
+      filters.value = {
+        startDate: "",
+        endDate: "",
+        fromIban: "",
+        toIban: "",
+        amount: "",
+        amountOperator: "eq",
+      };
+    };
+
+    onMounted(async () => {
+      if (userId) {
+        console.log('fetching user info')
+        await accountStore.fetchAccounts(userId);
+        await transactionStore.fetchTransactions(userId, filters.value);
+        console.log('transactions fetched:', transactionStore.transactions);
+      }
+    });
+
+    watch(filters, async () => {
+      if (userId) {
+        await transactionStore.fetchTransactions(userId, filters.value);
+      }
+    }, { deep: true });
+
+    return {
+      filters,
+      resetFilters,
+      filteredOutgoing, // Expose to template
+      filteredIncoming, // Expose to template
+      formatDate // Expose to template
+    };
   }
-});
-
-// Get all user's IBANs
-const userIbans = computed(() =>
-  accountStore.accounts.map(acc => acc.iban)
-);
-
-const formatDate = (dateStr) => {
-  return new Date(dateStr).toLocaleDateString();
-};
-
-// Helper to apply all filters
-function applyFilters(tx, direction) {
-  // Date filter
-  if (filters.value.startDate && new Date(tx.date) < new Date(filters.value.startDate)) return false;
-  if (filters.value.endDate && new Date(tx.date) > new Date(filters.value.endDate)) return false;
-  // From IBAN filter
-  if (filters.value.fromIban && !(tx.fromAccountIban?.includes(filters.value.fromIban))) return false;
-  // To IBAN filter
-  if (filters.value.toIban && !(tx.toAccountIban?.includes(filters.value.toIban))) return false;
-  // Amount filter
-  if (filters.value.amount !== "" && filters.value.amount !== null) {
-    if (filters.value.amountOperator === "eq" && tx.amount != filters.value.amount) return false;
-    if (filters.value.amountOperator === "lt" && tx.amount >= filters.value.amount) return false;
-    if (filters.value.amountOperator === "gt" && tx.amount <= filters.value.amount) return false;
-  }
-  // Direction filter (outgoing/incoming)
-  if (direction === "out" && !userIbans.value.includes(tx.fromAccountIban)) return false;
-  if (direction === "in" && !userIbans.value.includes(tx.toAccountIban)) return false;
-  return true;
 }
-
-// Outgoing: transactions where the user's IBAN is the sender
-const filteredOutgoing = computed(() =>
-  transactionStore.transactions.filter(tx => applyFilters(tx, "out"))
-);
-
-// Incoming: transactions where the user's IBAN is the recipient
-const filteredIncoming = computed(() =>
-  transactionStore.transactions.filter(tx => applyFilters(tx, "in"))
-);
 </script>
