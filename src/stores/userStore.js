@@ -1,6 +1,7 @@
 import axios from '../axios-auth'
 import { defineStore } from 'pinia'
 import {setAuthToken} from "@/utils/auth.js";
+import {getAuthToken} from "@/utils/auth.js";
 
 export const userStore = defineStore('store', {
   state: () => ({
@@ -10,12 +11,12 @@ export const userStore = defineStore('store', {
     // lastName: '',
     // email: '',
     // phoneNumber: '',
-    role: ''
-
+    role: '',
+    user: null,
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
-    getUserId: (state) => state.user_id,
+    //getUserId: (state) => state.user_id,
     isEmployee: (state) => state.role === 'ROLE_EMPLOYEE',
   },
   actions: {
@@ -79,10 +80,10 @@ export const userStore = defineStore('store', {
       this.role = response.role
       setAuthToken(response.token)
     },
-    autologin() {
+    async autologin() {
       if (localStorage['token']) {
         try {
-          this.token = localStorage.getItem('token')
+          this.token = getAuthToken();
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
           console.log('Token still active');
@@ -124,6 +125,38 @@ export const userStore = defineStore('store', {
                         .catch(error => reject(error.response));
                 });
             },
+    async getUserInfo(user_id) {
+      const token = getAuthToken();
+      console.log("Current axios defaults:", axios.defaults.headers.common)
+      console.log('Authorization header:', getAuthToken())
+      try {
+        const response = await axios.get(`/users/${user_id}`, {
+          headers: {
+            Authorization: `Bearer ${this.token}` // ✅ Attach token
+          },
+          withCredentials: true // ✅ Send cookies (if needed)
+        });
+        console.log('User fetched:', response.data);
+        this.user = response.data;
+        console.log('User accounts:', this.user.accounts);
+      } catch (error) {
+        console.error('Error fetching user:', error.response || error);
+        throw error; // ✅ Throw the full error for debugging
+      }
+    },
+    // async getUserInfo(user_id) {
+    //   const token = localStorage.getItem('token');
+    //   return axios.get(`/users/${user_id}`, {
+    //     headers: {
+    //       Authorization: `Bearer ${token}`
+    //     }
+    //   })
+    //       .then(result => result.data)
+    //       .catch(error => {
+    //         console.error('Failed to fetch user info:', error.response || error);
+    //         throw error;
+    //       });
+    // },
     logout() {
       this.token = ''
       this.user_id = 0
