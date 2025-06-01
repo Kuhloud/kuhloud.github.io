@@ -1,6 +1,6 @@
 import axios from '../axios-auth'
 import { defineStore } from 'pinia'
-import {setAuthToken} from "@/utils/auth.js";
+import { setAuthToken, getAuthToken } from "@/utils/auth.js"
 
 export const userStore = defineStore('store', {
   state: () => ({
@@ -11,7 +11,6 @@ export const userStore = defineStore('store', {
     // email: '',
     // phoneNumber: '',
     role: ''
-
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
@@ -41,6 +40,7 @@ export const userStore = defineStore('store', {
         return Promise.reject(error)
       }
     },
+
     async login(email, password) {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
@@ -58,6 +58,7 @@ export const userStore = defineStore('store', {
         return Promise.reject(error)
       }
     },
+
     // async getUserRole() {
     //   return new Promise((resolve, reject) => {
     //     axios
@@ -70,6 +71,7 @@ export const userStore = defineStore('store', {
     //       .catch((error) => reject(error))
     //   })
     // },
+
     async setUserData(response) {
       localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.id)
@@ -79,6 +81,7 @@ export const userStore = defineStore('store', {
       this.role = response.role
       setAuthToken(response.token)
     },
+
     autologin() {
       if (localStorage['token']) {
         try {
@@ -91,6 +94,7 @@ export const userStore = defineStore('store', {
         }
       }
     },
+
     validateInput(email) {
       if (email === '') {
         this.errorMessage = 'Please fill in your email address'
@@ -98,32 +102,46 @@ export const userStore = defineStore('store', {
       }
       return true
     },
+
     getAllUnapprovedUsers(page, limit) {
-               const offset = (page - 1) * limit;
-                return new Promise((resolve, reject) => {
-                    axios.get('/users/inactive',
-                        {
-                            params: {
-                                approved: false,
-                                offset: offset,
-                                limit: limit,
-                            }
-                        })
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
+      const offset = (page - 1) * limit;
+      return new Promise((resolve, reject) => {
+        axios.get('/users/inactive',
+          {
+            params: {
+              approved: false,
+              offset: offset,
+              limit: limit,
             },
-               approveUser(id) {
-                return new Promise((resolve, reject) => {
-                    axios.post(`/users/${id}/activateuser`)
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
-            },
+            headers: {
+              'Authorization': `Bearer ${getAuthToken()}` // Add auth token
+            }
+          })
+          .then(result => {
+            resolve(result.data);
+          })
+          .catch(error => reject(error.response));
+      });
+    },
+
+    approveUser(id) {
+      return new Promise((resolve, reject) => {
+        axios.post(`/users/${id}/activateuser`,
+          {},
+          {
+            headers: {
+              'Authorization': `Bearer ${getAuthToken()}`, // Auth for protected route
+              'Content-Type': 'application/json'
+            }
+          }
+        )
+          .then(result => {
+            resolve(result.data);
+          })
+          .catch(error => reject(error.response));
+      });
+    },
+
     logout() {
       this.token = ''
       this.user_id = 0
