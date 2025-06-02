@@ -50,9 +50,11 @@
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
+import { useTransactionStore } from "@/stores/transactionStore";
 import axios from "axios";
 
 const accountStore = useAccountStore();
+const transactionStore = useTransactionStore();
 const userId = localStorage.getItem("user_id");
 const action = ref("deposit");
 const amount = ref(null);
@@ -63,6 +65,7 @@ const loading = ref(false);
 onMounted(async () => {
   if (userId) {
     await accountStore.fetchAccounts(userId);
+    console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
   }
 });
 
@@ -99,23 +102,19 @@ const performAction = async () => {
       date: new Date().toISOString(),
       userInitiatingTransfer: { id: parseInt(userId) },
     };
-    await axios.post(
-      "http://localhost:8080/transactions/create",
-      payload,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    await accountStore.fetchAccounts(userId);
-    showMessage(
-      action.value === "deposit"
-        ? `Deposited €${amount.value} successfully!`
-        : `Withdrew €${amount.value} successfully!`,
-      "success"
-    );
-    amount.value = null;
+    const success = await transactionStore.submitTransfer(payload, token);
+    if (success) {
+      await accountStore.fetchAccounts(userId);
+      showMessage(
+        action.value === "deposit"
+          ? `Deposited €${amount.value} successfully!`
+          : `Withdrew €${amount.value} successfully!`,
+        "success"
+      );
+      amount.value = null;
+    } else {
+      showMessage("Failed to perform action. Please try again.");
+    }
   } catch (err) {
     showMessage(
       err?.response?.data?.message ||
