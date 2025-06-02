@@ -3,12 +3,9 @@
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <button class="btn btn-danger" @click="$router.push('/')">← Back</button>
-        <router-link to="/users/inactivelist" class="btn btn-outline-primary">
-          Activate Users →
-        </router-link>
       </div>
 
-      <h2 class="mb-4">Customer Overview</h2>
+      <h2 class="mb-4">Unapproved Customers</h2>
 
       <div class="mb-3 row align-items-center">
         <label for="limit" class="col-sm-2 col-form-label">Page Limit</label>
@@ -17,7 +14,7 @@
             type="number"
             id="limit"
             v-model="pageLimit"
-            @change="getAllUsers"
+            @change="fetchUnapprovedCustomers"
             min="1"
             class="form-control"
           />
@@ -30,30 +27,22 @@
             <tr>
               <th>ID</th>
               <th>Name</th>
-              <th>BSN</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Approved</th>
-              <th class="text-center">Account Details</th>
+              <th>Role</th>
+              <th class="text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="user in users" :key="user.id">
               <td>{{ user.id }}</td>
               <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td>{{ user.bsn }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.phoneNumber }}</td>
-              <td>
-                <span
-                  :class="['badge', user.active ? 'bg-success' : 'bg-secondary']"
-                >
-                  {{ user.active ? 'Approved' : 'Not Approved yet' }}
-                </span>
-              </td>
+              <td>{{ user.role }}</td>
               <td class="text-center">
-                <button @click="goToUserDetails(user.id)" class="btn btn-sm btn-outline-success">
-                  View
+                <button @click="approveCustomer(user.id)" class="btn btn-sm btn-outline-success">
+                  Approve
                 </button>
               </td>
             </tr>
@@ -66,19 +55,22 @@
           :items-per-page="pageLimit"
           :max-pages-shown="5"
           v-model="currentPage"
-          :on-click="getAllUsers"
+          :on-click="fetchUnapprovedCustomers"
         />
       </div>
     </div>
   </section>
 </template>
 
-
 <script>
 import { userStore } from "@/stores/userStore";
 
 export default {
-  name: "users",
+  name: "InactiveCustomerList",
+  setup() {
+    const uStore = userStore();
+    return { uStore };
+  },
   data() {
     return {
       users: [],
@@ -87,23 +79,28 @@ export default {
     };
   },
   mounted() {
-    this.getAllUsers();
+    this.fetchUnapprovedCustomers();
   },
   methods: {
-    getAllUsers() {
-      const store = userStore();
-      store
-        .getAllUsers(this.currentPage, this.pageLimit)
+    fetchUnapprovedCustomers() {
+      this.uStore.fetchUnapprovedCustomers(this.currentPage, this.pageLimit)
         .then((result) => {
           this.users = result;
         })
-        .catch((err) => {
-          console.error("Failed to load users:", err);
-        });
+        .catch((err) => console.error("Failed to fetch users", err));
     },
-    goToUserDetails(id) {
-      this.$router.push(`/users/userdetails/${id}`);
+    approveCustomer(id) {
+      this.uStore.approveCustomer(id)
+        .then(() => {
+          this.fetchUnapprovedCustomers();
+        });
     },
   },
 };
 </script>
+
+<style scoped>
+.table th, .table td {
+  vertical-align: middle;
+}
+</style>
