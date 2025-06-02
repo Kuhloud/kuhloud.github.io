@@ -148,19 +148,21 @@ approveCustomer(id) {
         throw error; // ✅ Throw the full error for debugging
       }
     },
-    // async getUserInfo(user_id) {
-    //   const token = localStorage.getItem('token');
-    //   return axios.get(`/users/${user_id}`, {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`
-    //     }
-    //   })
-    //       .then(result => result.data)
-    //       .catch(error => {
-    //         console.error('Failed to fetch user info:', error.response || error);
-    //         throw error;
-    //       });
-    // },
+ 
+getAllUsers(page, limit) {
+  const offset = (page - 1) * limit;
+
+  return axios.get('/users', {
+    params: { offset, limit },
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    throw error.response;
+  });
+},
     logout() {
       this.token = ''
       this.user_id = 0
