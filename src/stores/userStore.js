@@ -99,38 +99,36 @@ export const userStore = defineStore('store', {
       }
       return true
     },
-    getAllUnapprovedUsers(page, limit) {
-               const offset = (page - 1) * limit;
-                return new Promise((resolve, reject) => {
-                    axios.get('/users/inactive',
-                        {
-                            params: {
-                                approved: false,
-                                offset: offset,
-                                limit: limit,
-                            },
-                        })
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
-            },
-               approveUser(id) {
-                return new Promise((resolve, reject) => {
-                    axios.post(`/users/${id}/activateuser`,
-                        {},
-                        {
-                          headers: {
-                            Authorization: `Bearer ${this.token}`,
-                          },
-                        })
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
-            },
+fetchUnapprovedCustomers(page, limit) {
+  const offset = (page - 1) * limit;
+  return new Promise((resolve, reject) => {
+    axios.get('/users/inactive', {
+      params: {
+        approved: false,
+        offset: offset,
+        limit: limit,
+      },
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    })
+    .then(result => resolve(result.data))
+    .catch(error => reject(error.response));
+  });
+},
+
+approveCustomer(id) {
+  return new Promise((resolve, reject) => {
+    axios.post(`/users/${id}/activateuser`, {}, {
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(result => resolve(result.data))
+    .catch(error => reject(error.response));
+  });
+},
     async getUserInfo(user_id) {
       const token = getAuthToken();
       console.log("Current axios defaults:", axios.defaults.headers.common)
