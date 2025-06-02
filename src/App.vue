@@ -7,13 +7,13 @@
           <RouterLink class="nav-item nav-link" to="/mockATM">ATM</RouterLink>
           <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
           <RouterLink class="nav-item nav-link" to="/users">Users</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/profile">Profile</RouterLink>
           <button class="nav-item nav-link btn btn-link" @click="logout">Logout</button>
         </template>
         <template v-else>
           <RouterLink class="nav-item nav-link" to="/login">Login</RouterLink>
           <RouterLink class="nav-item nav-link" to="/signup">Signup</RouterLink>
         </template>
-        <RouterLink class="nav-item nav-link" to="/profile">Profile</RouterLink>
       </div>
     </div>
   </nav>

@@ -51,6 +51,7 @@
 import { ref, computed, onMounted } from "vue";
 import { useAccountStore } from "@/stores/accountStore";
 import axios from "axios";
+import {getAuthToken} from "@/utils/auth.js";
 
 const accountStore = useAccountStore();
 const userId = localStorage.getItem("user_id");
@@ -90,7 +91,7 @@ const performAction = async () => {
 
   loading.value = true;
   try {
-    const token = localStorage.getItem("token");
+    const token = getAuthToken();
     const payload = {
       fromAccount: { iban: action.value === "deposit" ? "ATM" : checkingAccount.value.iban },
       toAccount: { iban: action.value === "deposit" ? checkingAccount.value.iban : "ATM" },

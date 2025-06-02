@@ -22,7 +22,7 @@ export const userStore = defineStore('store', {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
         if (!this.validateInput(sanitizedEmail)) {
-          return Promise.reject(new Error(this.errorMessage))
+          return Promise.reject(new Error("Please enter a valid email address"))
         }
         const res = await axios.post('/users/signup', {
           firstName: sanitizedFirstName,
@@ -42,7 +42,7 @@ export const userStore = defineStore('store', {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
         if (!this.validateInput(sanitizedEmail)) {
-          return Promise.reject(new Error(this.errorMessage))
+          return Promise.reject(new Error("Please enter a valid email address"))
         }
         const res = await axios.post('/users/login', {
           email: sanitizedEmail,
@@ -104,7 +104,7 @@ export const userStore = defineStore('store', {
                                 approved: false,
                                 offset: offset,
                                 limit: limit,
-                            }
+                            },
                         })
                         .then(result => {
                             resolve(result.data);
@@ -114,7 +114,13 @@ export const userStore = defineStore('store', {
             },
                approveUser(id) {
                 return new Promise((resolve, reject) => {
-                    axios.post(`/users/${id}/activateuser`)
+                    axios.post(`/users/${id}/activateuser`,
+                        {},
+                        {
+                          headers: {
+                            Authorization: `Bearer ${this.token}`,
+                          },
+                        })
                         .then(result => {
                             resolve(result.data);
                         })

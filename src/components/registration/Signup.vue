@@ -51,7 +51,7 @@
   </template>
   
   <script>
-  import { userStore } from '../../stores/userStore'
+  import { userStore } from '@/stores/userStore.js'
   
   export default {
     name: 'SignupComponent',
@@ -87,7 +87,7 @@
           .then(() => {
             this.$router.replace('/')
           })
-          .catch((error) => (this.errorMessage = error))
+          .catch(() => (this.errorMessage = "Could not create an user account. Please try again."))
       }
     }
   }
