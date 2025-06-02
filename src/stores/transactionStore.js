@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
+import {getAuthToken} from "@/utils/auth.js";
 
 export const useTransactionStore = defineStore('transaction', () => {
   const transactions = ref([])
@@ -14,6 +15,9 @@ export const useTransactionStore = defineStore('transaction', () => {
       await axios.post(
         "http://localhost:8080/transactions/create",
         payload,
+        token
+          ? { headers: { Authorization: `Bearer ${token}` } }
+          : undefined
       )
       return true
     } catch (err) {
@@ -25,11 +29,25 @@ export const useTransactionStore = defineStore('transaction', () => {
   }
 
   // Fetch all transactions for a user
-  const fetchTransactions = async (userId) => {
+  const fetchTransactions = async (userId, filter) => {
+    // Build URLSearchParams from the filters object, ignoring empty/null values
+    const query = new URLSearchParams();
+    Object.entries(filter).forEach(([key, value]) => {
+      if (value !== null && value !== '' && value !== undefined) {
+        query.append(key, value);
+      }
+    });
     loading.value = true
     error.value = null
+    //console.log("Current axios defaults:", axios.defaults.headers.common)
+    //console.log('Authorization header:', getAuthToken())
+    console.log('fetching transactions info', filter)
     try {
-      const response = await axios.get(`http://localhost:8080/transactions/user/${userId}`)
+      const response = await axios.get(`http://localhost:8080/transactions/user/${userId}`,
+      {
+        params: query // Pass filters as query params
+      });
+      console.log('fetched transactions info', response.data)
       transactions.value = response.data
     } catch (err) {
       error.value = err

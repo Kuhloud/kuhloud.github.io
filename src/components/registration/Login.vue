@@ -49,7 +49,7 @@ export default {
           //console.log('Token after login:', this.store.token)
           this.$router.replace('/')
         })
-        .catch((error) => (this.errorMessage = error))
+        .catch(() => (this.errorMessage = "Email or password is incorrect. Please try again."))
     }
   }
 }

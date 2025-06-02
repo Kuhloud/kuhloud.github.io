@@ -18,6 +18,7 @@ import TransferHistory from "@/components/TransferHistory.vue";
 import User from "@/components/User.vue";
 import InactiveList from "@/components/inactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
+import Profile from "@/components/profile/Profile.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -63,6 +64,10 @@ const routes = [
   {
     path: "/mockATM",
     component: MockATM,
+  },
+  {
+    path: "/profile",
+    component: Profile,
   }
 ];
 
