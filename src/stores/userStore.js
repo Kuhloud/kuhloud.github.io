@@ -7,10 +7,6 @@ export const userStore = defineStore('store', {
   state: () => ({
     token: '',
     user_id: 0,
-    // firstName: '',
-    // lastName: '',
-    // email: '',
-    // phoneNumber: '',
     role: '',
     user: null,
   }),
