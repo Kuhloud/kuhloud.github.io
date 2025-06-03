@@ -42,6 +42,11 @@
                 <input id="inputBsn" type="text" v-model="bsn" class="form-control" required/>
                 <small class="form-text text-danger">Required</small>
               </section>
+              <section class="mb-3">
+                <label for="inputPhone" class="form-label">Phone Number</label>
+                <input id="inputPhone" type="text" v-model="phoneNumber" class="form-control" required/>
+                <small class="form-text text-danger">Required</small>
+              </section>
               <button type="button" class="btn btn-primary" @click="signup">Signup</button>
             </form>
           </section>
@@ -67,6 +72,7 @@
         password: '',
         confirmPassword: '',
         bsn: '',
+        phoneNumber: '',
         errorMessage: ''
       }
     },
@@ -79,15 +85,19 @@
       bsnIsAllNumeric(bsn) {
         return /^\d+$/.test(bsn);
       },
+      phoneNumberIsFormattedCorrectly(phoneNumber) {
+        return /^\d{3}-\d{3}-\d{4}$/.test(phoneNumber);
+      },
      async signup() {
         this.validatePassword()
         this.bsnIsAllNumeric(this.bsn)
+        this.phoneNumberIsFormattedCorrectly(this.phoneNumber)
         await this.store
-          .signup(this.firstName, this.lastName, this.email, this.password, this.bsn)
+          .signup(this.firstName, this.lastName, this.email, this.password, this.bsn, this.phoneNumber)
           .then(() => {
             this.$router.replace('/')
           })
-          .catch(() => (this.errorMessage = "Could not create an user account. Please try again."))
+          .catch((e) => (this.errorMessage = "Could not create an user account. Please try again." + e.message))
       }
     }
   }

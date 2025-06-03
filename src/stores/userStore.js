@@ -16,10 +16,11 @@ export const userStore = defineStore('store', {
     isEmployee: (state) => state.role === 'ROLE_EMPLOYEE',
   },
   actions: {
-    async signup(firstName, lastName, email, password, bsn) {
+    async signup(firstName, lastName, email, password, bsn, phoneNumber) {
       const sanitizedFirstName = firstName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedLastName = lastName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedEmail = email.trim().toLowerCase()
+      console.log('Sanitized input:', {firstName, lastName, email, password, bsn, phoneNumber})
       try {
         if (!this.validateInput(sanitizedEmail)) {
           return Promise.reject(new Error("Please enter a valid email address"))
@@ -29,9 +30,10 @@ export const userStore = defineStore('store', {
           lastName: sanitizedLastName,
           email: sanitizedEmail,
           password: password,
-          bsn: bsn
+          bsn: bsn,
+          phoneNumber: phoneNumber
         })
-        //console.log('Response from signup:', res.data)
+        console.log('Response from signup:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
@@ -56,20 +58,6 @@ export const userStore = defineStore('store', {
         return Promise.reject(error)
       }
     },
-
-    // async getUserRole() {
-    //   return new Promise((resolve, reject) => {
-    //     axios
-    //       .get(`/userrole/${this.user_id}`)
-    //       .then((res) => {
-    //         localStorage.setItem('role', res.data)
-    //         this.role = res.data
-    //         resolve()
-    //       })
-    //       .catch((error) => reject(error))
-    //   })
-    // },
-
     async setUserData(response) {
       localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.id)
@@ -148,11 +136,10 @@ approveCustomer(id) {
 
 ,
     async getUserInfo(user_id) {
-      const token = getAuthToken();
       console.log("Current axios defaults:", axios.defaults.headers.common)
       console.log('Authorization header:', getAuthToken())
       try {
-        const response = await axios.get(`/users/${user_id}`, {
+        const response = await axios.get(`/users/profile/${user_id}`, {
           headers: {
             Authorization: `Bearer ${this.token}` // ✅ Attach token
           },

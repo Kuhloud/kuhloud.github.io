@@ -96,12 +96,12 @@ const performAction = async () => {
   try {
     const token = getAuthToken();
     const payload = {
-      fromAccount: { iban: action.value === "deposit" ? "ATM" : checkingAccount.value.iban },
-      toAccount: { iban: action.value === "deposit" ? checkingAccount.value.iban : "ATM" },
+      fromAccountIban: action.value === "deposit" ? "ATM" : checkingAccount.value.iban,
+      toAccountIban: action.value === "deposit" ? checkingAccount.value.iban : "ATM",
       amount: parseFloat(amount.value),
       description: action.value === "deposit" ? "ATM Deposit" : "ATM Withdrawal",
       date: new Date().toISOString(),
-      userInitiatingTransfer: { id: parseInt(userId) },
+      userInitiatingTransfer: parseInt(userId)
     };
     const success = await transactionStore.submitTransfer(payload, token);
     if (success) {
