@@ -170,15 +170,15 @@ export default {
       }
 
       const payload = {
-        fromAccount: { iban: selectedAccount.value.iban },
-        toAccount:
+        fromAccountIban: selectedAccount.value.iban,
+        toAccountIban:
           transferType.value === "own"
-            ? { iban: toAccount.value.iban }
-            : { iban: toIban.value },
+            ? toAccount.value.iban
+            : toIban.value,
         amount: parseFloat(amount.value),
         description: description.value,
         date: new Date().toISOString(),
-        userInitiatingTransfer: { id: parseInt(userId) },
+        userInitiatingTransfer: parseInt(userId),
       };
 
       const success = await transactionStore.submitTransfer(payload, token);
