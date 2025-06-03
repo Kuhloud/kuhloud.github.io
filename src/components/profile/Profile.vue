@@ -1,12 +1,12 @@
 <template>
   <section class="container">
     <section class="row">
-      <section class="col-12" v-if="user">
-        <h1 class="text-center">Profile</h1>
-        <p class="text-center">Name: {{ user.firstName }} {{ user.lastName }}</p>
-        <p class="text-center">E-mail Address: {{ user.email }}</p>
-        <p class="text-center">Bsn: {{ user.bsn }}</p>
-        <p class="text-center">Phone Number: {{ user.phoneNumber }}</p>
+      <h1 class="text-center">Profile</h1>
+      <section class="col-12 card" v-if="user">
+        <p><strong>Name: </strong> {{ user.firstName }} {{ user.lastName }}</p>
+        <p><strong>E-mail Address: </strong> {{ user.email }}</p>
+        <p><strong>Phone Number: </strong> {{ user.phoneNumber }}</p>
+        <p><strong>BSN: </strong> {{ user.bsn }}</p>
       </section>
       <p v-else>No user found.</p>
     </section>
@@ -69,5 +69,12 @@ export default {
 </script>
 
 <style scoped>
-
+.card {
+  border-radius: 12px;
+  border: 1px solid #dee2e6;
+  background-color: #fff;
+}
+ul {
+  list-style: none;
+}
 </style>

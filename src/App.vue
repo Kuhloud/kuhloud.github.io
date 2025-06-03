@@ -4,10 +4,10 @@
       <RouterLink to="/" class="navbar-brand">Benevolent Bank</RouterLink>
       <div class="navbar-nav ms-auto">
         <template v-if="isLoggedIn">
-          <RouterLink class="nav-item nav-link" to="/mockATM">ATM</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/mockATM" v-if="!isEmployee">ATM</RouterLink>
           <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
-          <RouterLink class="nav-item nav-link" to="/users">Users</RouterLink>
-          <RouterLink class="nav-item nav-link" to="/profile">Profile</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/users" v-if="isEmployee">Users</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/profile" v-if="!isEmployee">Profile</RouterLink>
           <button class="nav-item nav-link btn btn-link" @click="logout">Logout</button>
         </template>
         <template v-else>
@@ -36,6 +36,7 @@ export default {
     store.autologin()
     // Use the reactive isLoggedIn getter from the store
     const isLoggedIn = computed(() => store.isLoggedIn);
+    const isEmployee = computed(() => store.isEmployee);
 
     // Use the logout function from the store
     const logout = () => {
@@ -45,6 +46,7 @@ export default {
 
     return {
       isLoggedIn,
+      isEmployee,
       logout,
     };
   },
