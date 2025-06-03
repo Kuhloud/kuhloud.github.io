@@ -16,9 +16,12 @@ import MockATM from "@/components/MockATM.vue";
 import TransferHistory from "@/components/TransferHistory.vue";
 
 import User from "@/components/User.vue";
-import InactiveList from "@/components/inactiveCustomers.vue";
+import InactiveList from "@/components/InactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import Profile from "@/components/profile/Profile.vue";
+
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -80,5 +83,6 @@ const app = createApp(App);
 
 app.use(router);
 app.use(createPinia());
+app.use(Toast)
 
 app.mount("#app");

@@ -118,17 +118,35 @@ fetchUnapprovedCustomers(page, limit) {
 },
 
 approveCustomer(id) {
-  return new Promise((resolve, reject) => {
-    axios.post(`/users/${id}/activateuser`, {}, {
-      headers: {
-        'Authorization': `Bearer ${getAuthToken()}`,
-        'Content-Type': 'application/json'
-      }
-    })
-    .then(result => resolve(result.data))
-    .catch(error => reject(error.response));
+  const input = this.activationInputs[id];
+  if (!input || input.dailyLimit == null || input.absoluteLimit == null) {
+    alert("Please enter both daily and absolute limits.");
+    return;
+  }
+
+  axios.post(`/users/${id}/activateuser`, {
+    dailyLimit: input.dailyLimit,
+    absoluteLimit: input.absoluteLimit
+  }, {
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`,
+      'Content-Type': 'application/json'
+    }
+  })
+  .then(() => {
+    this.fetchUnapprovedCustomers();
+    delete this.activationInputs[id]; // 🔧 FIXED: No this.$delete
+    alert("User successfully activated.");
+  })
+  .catch(err => {
+    const message = err?.response?.data?.message || err.message || "Unknown error";
+    console.error("Activation failed:", message);
+    alert("Failed to activate user: " + message);
   });
-},
+}
+
+
+,
     async getUserInfo(user_id) {
       const token = getAuthToken();
       console.log("Current axios defaults:", axios.defaults.headers.common)
