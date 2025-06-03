@@ -4,7 +4,7 @@
       <RouterLink to="/" class="navbar-brand">Benevolent Bank</RouterLink>
       <div class="navbar-nav ms-auto">
         <template v-if="isLoggedIn">
-          <RouterLink class="nav-item nav-link" to="/mockATM">ATM</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/mockATM" v-if="!isEmployee">ATM</RouterLink>
           <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
           <RouterLink class="nav-item nav-link" to="/users" v-if="isEmployee">Users</RouterLink>
           <RouterLink class="nav-item nav-link" to="/profile" v-if="!isEmployee">Profile</RouterLink>
