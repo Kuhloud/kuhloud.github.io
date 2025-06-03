@@ -19,7 +19,7 @@
     </div>
 
     <!-- Transacties, ook pas tonen als geladen -->
-    <div v-if="transactions.length" class="card p-4 shadow-sm">
+    <div class="card p-4 shadow-sm">
       <h4 class="mb-3">Transaction History</h4>
       <div class="table-responsive">
         <table class="table table-bordered table-striped">
