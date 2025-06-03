@@ -38,6 +38,7 @@ export const userStore = defineStore('store', {
         return Promise.reject(error)
       }
     },
+
     async login(email, password) {
       const sanitizedEmail = email.trim().toLowerCase()
       try {
@@ -55,6 +56,7 @@ export const userStore = defineStore('store', {
         return Promise.reject(error)
       }
     },
+
     // async getUserRole() {
     //   return new Promise((resolve, reject) => {
     //     axios
@@ -67,6 +69,7 @@ export const userStore = defineStore('store', {
     //       .catch((error) => reject(error))
     //   })
     // },
+
     async setUserData(response) {
       localStorage.setItem('token', response.token)
       localStorage.setItem('user_id', response.id)
@@ -88,6 +91,7 @@ export const userStore = defineStore('store', {
         }
       }
     },
+
     validateInput(email) {
       if (email === '') {
         this.errorMessage = 'Please fill in your email address'
@@ -95,38 +99,36 @@ export const userStore = defineStore('store', {
       }
       return true
     },
-    getAllUnapprovedUsers(page, limit) {
-               const offset = (page - 1) * limit;
-                return new Promise((resolve, reject) => {
-                    axios.get('/users/inactive',
-                        {
-                            params: {
-                                approved: false,
-                                offset: offset,
-                                limit: limit,
-                            },
-                        })
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
-            },
-               approveUser(id) {
-                return new Promise((resolve, reject) => {
-                    axios.post(`/users/${id}/activateuser`,
-                        {},
-                        {
-                          headers: {
-                            Authorization: `Bearer ${this.token}`,
-                          },
-                        })
-                        .then(result => {
-                            resolve(result.data);
-                        })
-                        .catch(error => reject(error.response));
-                });
-            },
+fetchUnapprovedCustomers(page, limit) {
+  const offset = (page - 1) * limit;
+  return new Promise((resolve, reject) => {
+    axios.get('/users/inactive', {
+      params: {
+        approved: false,
+        offset: offset,
+        limit: limit,
+      },
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`
+      }
+    })
+    .then(result => resolve(result.data))
+    .catch(error => reject(error.response));
+  });
+},
+
+approveCustomer(id) {
+  return new Promise((resolve, reject) => {
+    axios.post(`/users/${id}/activateuser`, {}, {
+      headers: {
+        'Authorization': `Bearer ${getAuthToken()}`,
+        'Content-Type': 'application/json'
+      }
+    })
+    .then(result => resolve(result.data))
+    .catch(error => reject(error.response));
+  });
+},
     async getUserInfo(user_id) {
       const token = getAuthToken();
       console.log("Current axios defaults:", axios.defaults.headers.common)
@@ -146,19 +148,21 @@ export const userStore = defineStore('store', {
         throw error; // ✅ Throw the full error for debugging
       }
     },
-    // async getUserInfo(user_id) {
-    //   const token = localStorage.getItem('token');
-    //   return axios.get(`/users/${user_id}`, {
-    //     headers: {
-    //       Authorization: `Bearer ${token}`
-    //     }
-    //   })
-    //       .then(result => result.data)
-    //       .catch(error => {
-    //         console.error('Failed to fetch user info:', error.response || error);
-    //         throw error;
-    //       });
-    // },
+ 
+getAllUsers(page, limit) {
+  const offset = (page - 1) * limit;
+
+  return axios.get('/users', {
+    params: { offset, limit },
+    headers: {
+      Authorization: `Bearer ${getAuthToken()}`
+    }
+  })
+  .then(response => response.data)
+  .catch(error => {
+    throw error.response;
+  });
+},
     logout() {
       this.token = ''
       this.user_id = 0
