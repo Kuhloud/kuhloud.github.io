@@ -134,7 +134,7 @@ approveCustomer(id) {
       console.log("Current axios defaults:", axios.defaults.headers.common)
       console.log('Authorization header:', getAuthToken())
       try {
-        const response = await axios.get(`/users/${user_id}`, {
+        const response = await axios.get(`/users/profile/${user_id}`, {
           headers: {
             Authorization: `Bearer ${this.token}` // ✅ Attach token
           },
