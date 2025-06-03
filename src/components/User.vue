@@ -1,109 +1,112 @@
 <template>
-  <section class="py-4">
-    <div class="container">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/')">← Back</button>
-        <router-link to="/users/inactivelist" class="btn btn-outline-primary">
-          Activate Users →
-        </router-link>
-      </div>
+<section>
+  <div class="container">
+    <button class="btn btn-danger " @click="this.$router.push('/')">Back</button>
 
-      <h2 class="mb-4">Customer Overview</h2>
-
-      <div class="mb-3 row align-items-center">
-        <label for="limit" class="col-sm-2 col-form-label">Page Limit</label>
-        <div class="col-sm-2">
-          <input
-            type="number"
-            id="limit"
-            v-model="pageLimit"
-            @change="getAllUsers"
-            min="1"
-            class="form-control"
-          />
+    <div class="row">
+      <div class="col-md-12">
+        <h1>Unapproved User List</h1>
+        <div>
+          <label for="limit" class="form-group">Page limit</label>
+          <input type="number" id="limit" v-model="pageLimit" @change="getAllUnapprovedUsers" min="1" class="form-control inputField">
         </div>
-      </div>
-
-      <div class="table-responsive">
-        <table class="table table-bordered table-striped align-middle">
-          <thead class="table-dark">
+        <table class="table table-bordered table-striped">
+          <thead>
             <tr>
               <th>ID</th>
               <th>Name</th>
-              <th>BSN</th>
               <th>Email</th>
               <th>Phone</th>
-              <th>Approved</th>
-              <th class="text-center">Account Details</th>
+              <th>Role</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
             <tr v-for="user in users" :key="user.id">
               <td>{{ user.id }}</td>
-              <td>{{ user.firstName }} {{ user.lastName }}</td>
-              <td>{{ user.bsn }}</td>
+              <td>{{ user.firstName + " " + user.lastName }}</td>
               <td>{{ user.email }}</td>
               <td>{{ user.phoneNumber }}</td>
+              <td>{{ user.role }}</td>
               <td>
-                <span
-                  :class="['badge', user.active ? 'bg-success' : 'bg-secondary']"
-                >
-                  {{ user.active ? 'Approved' : 'Not Approved yet' }}
-                </span>
-              </td>
-              <td class="text-center">
-                <button @click="goToUserDetails(user.id)" class="btn btn-sm btn-outline-success">
-                  View
-                </button>
+                <button @click="approveUser(user.id)" class="btn btn-success btn-sm">Approve</button>
               </td>
             </tr>
           </tbody>
         </table>
-      </div>
-
-      <div class="d-flex justify-content-center mt-4">
         <vue-awesome-paginate
-          :items-per-page="pageLimit"
-          :max-pages-shown="5"
-          v-model="currentPage"
-          :on-click="getAllUsers"
+            :items-per-page="this.pageLimit"
+            :max-pages-shown="5"
+            v-model="currentPage"
+            :on-click="getAllUnapprovedUsers"
         />
       </div>
     </div>
-  </section>
+  </div>
+</section>
 </template>
-
 
 <script>
 import { userStore } from "@/stores/userStore";
 
+
 export default {
-  name: "users",
+  name: "UnapprovedCustomerList",
+  setup() {
+    const uStore = userStore();
+    return { uStore };
+  },
   data() {
     return {
       users: [],
       currentPage: 1,
       pageLimit: 10,
-    };
+    }
   },
   mounted() {
-    this.getAllUsers();
+    this.getAllUnapprovedUsers();
   },
   methods: {
-    getAllUsers() {
-      const store = userStore();
-      store
-        .getAllUsers(this.currentPage, this.pageLimit)
-        .then((result) => {
-          this.users = result;
-        })
-        .catch((err) => {
-          console.error("Failed to load users:", err);
-        });
+    getAllUnapprovedUsers() {
+      this.uStore.getAllUnapprovedUsers(this.currentPage, this.pageLimit)
+          .then((result) => {
+            this.users = result;
+          });
+          console.log(this.users);
     },
-    goToUserDetails(id) {
-      this.$router.push(`/users/userdetails/${id}`);
-    },
-  },
-};
+    approveUser(id) {
+      this.uStore.approveUser(id)
+          .then(() => {
+            this.getAllUnapprovedUsers();
+          });
+    }
+  }
+}
 </script>
+
+<style>
+.user-pagination-container {
+  display: flex;
+  column-gap: 10px;
+}
+.user-paginate-btn {
+  height: 40px;
+  width: 40px;
+  border-radius: 20px;
+  cursor: pointer;
+  background-color: rgb(242, 242, 242);
+  border: 1px solid rgb(217, 217, 217);
+  color: black;
+}
+.user-paginate-btn:hover {
+  background-color: #d8d8d8;
+}
+.user-active-page {
+  background-color: #3498db;
+  border: 1px solid #3498db;
+  color: white;
+}
+.user-active-page:hover {
+  background-color: #2988c8;
+}
+</style>
