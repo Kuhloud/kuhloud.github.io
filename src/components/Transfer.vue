@@ -109,12 +109,14 @@
 
 <script>
 import { ref, onMounted, computed } from "vue";
+import { useRouter } from "vue-router"; // Import useRouter
 import { useAccountStore } from "@/stores/accountStore";
 import { useTransactionStore } from "@/stores/transactionStore";
 import axios from "axios";
 
 export default {
   setup() {
+    const router = useRouter(); // Initialize router
     const accountStore = useAccountStore();
     const transactionStore = useTransactionStore();
     const transferType = ref("own");
@@ -125,18 +127,21 @@ export default {
     const description = ref("");
     const userId = localStorage.getItem("user_id");
 
-    // Message state
-    const message = ref("");
-    const messageType = ref("success"); // 'success' or 'danger'
-
+    // Redirect to login if not logged in
     onMounted(() => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
       if (userId) {
-        console.log('fetchAccounts called with userId:', userId)
-        console.log("Current axios defaults:", axios.defaults.headers.common)
-        console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
         accountStore.fetchAccounts(userId);
       }
     });
+
+    // Message state
+    const message = ref("");
+    const messageType = ref("success"); // 'success' or 'danger'
 
     const showMessage = (msg, type = "danger") => {
       message.value = msg;

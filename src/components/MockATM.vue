@@ -49,11 +49,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useRouter } from "vue-router"; // Add this import
 import { useAccountStore } from "@/stores/accountStore";
 import { useTransactionStore } from "@/stores/transactionStore";
 import axios from "axios";
-import {getAuthToken} from "@/utils/auth.js";
+import { getAuthToken } from "@/utils/auth.js";
 
+const router = useRouter(); // Initialize router
 const accountStore = useAccountStore();
 const transactionStore = useTransactionStore();
 const userId = localStorage.getItem("user_id");
@@ -64,6 +66,11 @@ const messageType = ref("success");
 const loading = ref(false);
 
 onMounted(async () => {
+  const token = getAuthToken();
+  if (!token) {
+    router.push("/login");
+    return;
+  }
   if (userId) {
     await accountStore.fetchAccounts(userId);
     console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
