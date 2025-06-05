@@ -86,12 +86,14 @@
 </template>
 
 <script>
-import {ref, onMounted, watch, computed} from "vue"; // Add computed
+import { ref, onMounted, watch, computed } from "vue";
+import { useRouter } from "vue-router"; // Add this import
 import { useTransactionStore } from "@/stores/transactionStore";
 import { useAccountStore } from "@/stores/accountStore";
 
 export default {
   setup() {
+    const router = useRouter(); // Initialize router
     const transactionStore = useTransactionStore();
     const accountStore = useAccountStore();
     const userId = localStorage.getItem("user_id");
@@ -103,6 +105,19 @@ export default {
       toIban: "",
       amount: "",
       amountOperator: "eq",
+    });
+
+    // Redirect to login if not logged in
+    onMounted(async () => {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        router.push("/login");
+        return;
+      }
+      if (userId) {
+        await accountStore.fetchAccounts(userId);
+        await transactionStore.fetchTransactions(userId, filters.value);
+      }
     });
 
     // Add computed properties for transactions
