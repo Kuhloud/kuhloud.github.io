@@ -45,6 +45,22 @@
       </div>
     </div>
   </div>
+
+  <!-- ✅ Editable Limits -->
+<div v-if="user" class="card p-4 mb-4 shadow-sm">
+  <h4 class="mb-3">Limits</h4>
+  <div class="row">
+    <div class="col-md-6 mb-3">
+      <label for="dailyLimit" class="form-label">Daily Limit</label>
+      <input type="number" id="dailyLimit" v-model="editDailyLimit" class="form-control" />
+    </div>
+    <div class="col-md-6 mb-3">
+      <label for="absoluteLimit" class="form-label">Absolute Limit (CHECKING)</label>
+      <input type="number" id="absoluteLimit" v-model="editAbsoluteLimit" class="form-control" />
+    </div>
+  </div>
+  <button @click="updateLimits" class="btn btn-success">Save Limits</button>
+</div>
 </template>
 
 <script>
@@ -56,6 +72,9 @@ export default {
     return {
       user: null,
       transactions: [],
+      editDailyLimit: 0,
+      editAbsoluteLimit: 0,
+      checkingAccountId: null
     };
   },
   mounted() {
@@ -72,6 +91,14 @@ export default {
       })
       .then(res => {
         this.user = res.data;
+        this.editDailyLimit = res.data.dailyLimit;
+
+        const checking = res.data.accounts.find(acc => acc.accountType === 'CHECKING');
+        if (checking) {
+          this.editAbsoluteLimit = checking.absoluteLimit;
+          this.checkingAccountId = checking.id;
+        }
+
         console.log("User loaded:", this.user);
       })
       .catch(err => {
@@ -90,8 +117,45 @@ export default {
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString();
     },
+    updateLimits() {
+      const userId = this.user.id;
+      const token = getAuthToken();
+
+      // ✅ 1. Update Daily Limit
+      axios.patch(`/users/${userId}/dailyLimit`, {
+        dailyLimit: this.editDailyLimit
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      })
+      .then(() => {
+        console.log('Daily limit updated');
+      })
+      .catch(err => {
+        console.error('Failed to update daily limit:', err);
+      });
+
+      // ✅ 2. Update Absolute Limit (on account)
+      if (this.checkingAccountId !== null) {
+        axios.patch(`/accounts/${this.checkingAccountId}/absoluteLimit`, {
+          absoluteLimit: this.editAbsoluteLimit
+        }, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        })
+        .then(() => {
+          console.log('Absolute limit updated');
+        })
+        .catch(err => {
+          console.error('Failed to update absolute limit:', err);
+        });
+      }
+    }
   },
 };
+
 </script>
 
 <style scoped>
