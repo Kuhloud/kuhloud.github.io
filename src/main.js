@@ -19,6 +19,7 @@ import User from "@/components/User.vue";
 import InactiveList from "@/components/inactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import Profile from "@/components/profile/Profile.vue";
+import IbanSearch from "@/components/IbanSearch.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -68,6 +69,10 @@ const routes = [
   {
     path: "/profile",
     component: Profile,
+  },
+  {
+    path: "/ibanSearch",
+    component: IbanSearch,
   }
 ];
 

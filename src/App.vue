@@ -7,6 +7,7 @@
           <RouterLink class="nav-item nav-link" to="/mockATM" v-if="!isEmployee">ATM</RouterLink>
           <RouterLink class="nav-item nav-link" to="/transfer">Transfer</RouterLink>
           <RouterLink class="nav-item nav-link" to="/users" v-if="isEmployee">Users</RouterLink>
+          <RouterLink class="nav-item nav-link" to="/ibanSearch" v-if="!isEmployee">Search IBAN</RouterLink>
           <RouterLink class="nav-item nav-link" to="/profile" v-if="!isEmployee">Profile</RouterLink>
           <button class="nav-item nav-link btn btn-link" @click="logout">Logout</button>
         </template>

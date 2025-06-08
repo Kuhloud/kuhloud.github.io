@@ -150,6 +150,22 @@ getAllUsers(page, limit) {
     throw error.response;
   });
 },
+    async getUsersByFirstNameAndLastName(firstName, lastName)
+    {
+      const params = {};
+      if (firstName) params.firstName = firstName;
+      if (lastName) params.lastName = lastName;
+        return axios.get('/users/search', {
+            params,
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+        })
+        .then(response => response.data)
+        .catch(error => {
+            throw error.response;
+        });
+    },
     logout() {
       this.token = ''
       this.user_id = 0
