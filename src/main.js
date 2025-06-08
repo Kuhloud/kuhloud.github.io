@@ -1,4 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
+import { createRouter, createWebHashHistory } from "vue-router";
 import Home from "./components/Home.vue";
 import Auth from "./components/Auth.vue";
 import { getAuthToken, setAuthToken } from "@/utils/auth";
@@ -77,7 +77,7 @@ const routes = [
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 

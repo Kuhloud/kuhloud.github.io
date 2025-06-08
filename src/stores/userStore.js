@@ -20,7 +20,6 @@ export const userStore = defineStore('store', {
       const sanitizedFirstName = firstName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedLastName = lastName.trim().replace(/[^a-zA-Z'-]/g, '')
       const sanitizedEmail = email.trim().toLowerCase()
-      console.log('Sanitized input:', {firstName, lastName, email, password, bsn, phoneNumber})
       try {
         if (!this.validateInput(sanitizedEmail)) {
           return Promise.reject(new Error("Please enter a valid email address"))
@@ -33,7 +32,6 @@ export const userStore = defineStore('store', {
           bsn: bsn,
           phoneNumber: phoneNumber
         })
-        console.log('Response from signup:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
@@ -51,7 +49,6 @@ export const userStore = defineStore('store', {
           email: sanitizedEmail,
           password: password
         })
-        console.log('Response from login:', res.data)
         await this.setUserData(res.data)
         return Promise.resolve()
       } catch (error) {
@@ -73,7 +70,6 @@ export const userStore = defineStore('store', {
           this.token = getAuthToken();
           this.user_id = localStorage.getItem('user_id')
           this.role = localStorage.getItem('role')
-          console.log('Token still active');
         } catch (error) {
           console.error('Error while retrieving data from localStorage:', error)
         }
@@ -127,9 +123,7 @@ approveCustomer(id) {
           },
           withCredentials: true // ✅ Send cookies (if needed)
         });
-        console.log('User fetched:', response.data);
         this.user = response.data;
-        console.log('User accounts:', this.user.accounts);
       } catch (error) {
         console.error('Error fetching user:', error.response || error);
         throw error; // ✅ Throw the full error for debugging
