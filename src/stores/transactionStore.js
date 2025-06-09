@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
-import {getAuthToken} from "@/utils/auth.js";
+import { getAuthToken } from "@/utils/auth.js";
 
 export const useTransactionStore = defineStore('transaction', () => {
   const transactions = ref([])
@@ -15,11 +15,11 @@ export const useTransactionStore = defineStore('transaction', () => {
       await axios.post(
         "http://localhost:8080/transactions/create",
         payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       return true
     } catch (err) {
       error.value = err
@@ -28,6 +28,25 @@ export const useTransactionStore = defineStore('transaction', () => {
       loading.value = false
     }
   }
+
+  const performEmployeeTransfer = async (payload, token) => {
+    loading.value = true
+    error.value = null
+    try {
+      await axios.post("http://localhost:8080/transactions/employee-transfer", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+      return true;
+    } catch (err) {
+      error.value = err
+      return false;
+    } finally {
+      loading.value = false;
+    }
+  };
 
   // Fetch all transactions for a user
   const fetchTransactions = async (userId, filter) => {
@@ -45,9 +64,9 @@ export const useTransactionStore = defineStore('transaction', () => {
     console.log('fetching transactions info', filter)
     try {
       const response = await axios.get(`http://localhost:8080/transactions/user/${userId}`,
-      {
-        params: query // Pass filters as query params
-      });
+        {
+          params: query // Pass filters as query params
+        });
       console.log('fetched transactions info', response.data)
       transactions.value = response.data
     } catch (err) {
@@ -64,5 +83,6 @@ export const useTransactionStore = defineStore('transaction', () => {
     error,
     submitTransfer,
     fetchTransactions,
+    performEmployeeTransfer // ✅ Make sure this is here
   }
 })

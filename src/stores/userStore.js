@@ -168,6 +168,8 @@ getAllUsers(page, limit) {
     throw error.response;
   });
 },
+
+
     logout() {
       this.token = ''
       this.user_id = 0

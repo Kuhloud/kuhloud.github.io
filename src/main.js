@@ -20,8 +20,10 @@ import InactiveList from "@/components/InactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import Profile from "@/components/profile/Profile.vue";
 
+
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
+import EmployeeDashboard from "./components/EmployeeDashboard.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -71,6 +73,11 @@ const routes = [
   {
     path: "/profile",
     component: Profile,
+  },
+
+  {
+    path: "/employeedashboard",
+    component: EmployeeDashboard,
   }
 ];
 
