@@ -1,5 +1,4 @@
-import { createRouter, createWebHashHistory } from "./node_modules/vue-router/dist/vue-router.esm-browser.js";
-import Home from "./components/Home.vue";
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { getAuthToken, setAuthToken } from "@/utils/auth";
 import { createPinia } from "pinia";
 
@@ -19,6 +18,7 @@ import InactiveList from "@/components/inactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import Profile from "@/components/profile/Profile.vue";
 import IbanSearch from "@/components/IbanSearch.vue";
+import Home from "@/components/Home.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
