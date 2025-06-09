@@ -1,4 +1,5 @@
-export const API_BASE_URL = "http://localhost:8080";
+//export const API_BASE_URL = "http://localhost:8080";
+export const API_BASE_URL = "https://kuhloud.github.io/";
 
 export const API_ENDPOINTS = {
   signup: `${API_BASE_URL}/signup`,
