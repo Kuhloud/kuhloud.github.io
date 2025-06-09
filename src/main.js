@@ -1,6 +1,4 @@
-import { createRouter, createWebHistory } from "vue-router";
-import Home from "./components/Home.vue";
-import Auth from "./components/Auth.vue";
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { getAuthToken, setAuthToken } from "@/utils/auth";
 import { createPinia } from "pinia";
 
@@ -24,6 +22,8 @@ import Profile from "@/components/profile/Profile.vue";
 import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import EmployeeDashboard from "./components/EmployeeDashboard.vue";
+import IbanSearch from "@/components/IbanSearch.vue";
+import Home from "@/components/Home.vue";
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -78,11 +78,15 @@ const routes = [
   {
     path: "/employeedashboard",
     component: EmployeeDashboard,
+  },
+  {
+    path: "/ibanSearch",
+    component: IbanSearch,
   }
 ];
 
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHashHistory(),
   routes,
 });
 

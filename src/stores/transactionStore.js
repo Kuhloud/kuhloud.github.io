@@ -61,13 +61,11 @@ export const useTransactionStore = defineStore('transaction', () => {
     error.value = null
     //console.log("Current axios defaults:", axios.defaults.headers.common)
     //console.log('Authorization header:', getAuthToken())
-    console.log('fetching transactions info', filter)
     try {
       const response = await axios.get(`http://localhost:8080/transactions/user/${userId}`,
-        {
-          params: query // Pass filters as query params
-        });
-      console.log('fetched transactions info', response.data)
+      {
+        params: query // Pass filters as query params
+      });
       transactions.value = response.data
     } catch (err) {
       error.value = err
