@@ -24,6 +24,7 @@ import 'vue-toastification/dist/index.css'
 import EmployeeDashboard from "./components/EmployeeDashboard.vue";
 import IbanSearch from "@/components/IbanSearch.vue";
 import Home from "@/components/Home.vue";
+import EmployeeTransferUser from './components/EmployeeTransferUser.vue';
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -82,6 +83,10 @@ const routes = [
   {
     path: "/ibanSearch",
     component: IbanSearch,
+  },
+  {
+    path: "/employee-transfer",
+    component: EmployeeTransferUser,
   }
 ];
 
