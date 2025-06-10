@@ -19,6 +19,12 @@
         <h2 class="card-title">View User Details</h2>
         <p class="card-desc">Lookup customer profiles & transactions</p>
       </router-link>
+      
+      <router-link to="/employee-alltransactions" class="card">
+        <div class="card-icon">🔍</div>
+        <h2 class="card-title">View All Transactions</h2>
+        <p class="card-desc">Lookup all transactions</p>
+      </router-link>
     </div>
   </section>
 </template>

@@ -25,6 +25,7 @@ import EmployeeDashboard from "./components/EmployeeDashboard.vue";
 import IbanSearch from "@/components/IbanSearch.vue";
 import Home from "@/components/Home.vue";
 import EmployeeTransferUser from './components/EmployeeTransferUser.vue';
+import EmployeeAllTransactionsList from './components/EmployeeAllTransactionsList.vue';
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -87,6 +88,10 @@ const routes = [
   {
     path: "/employee-transfer",
     component: EmployeeTransferUser,
+  },
+  {
+    path: "/employee-alltransactions",
+    component: EmployeeAllTransactionsList,
   }
 ];
 

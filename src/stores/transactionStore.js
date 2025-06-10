@@ -82,6 +82,27 @@ export const useTransactionStore = defineStore('transaction', () => {
       loading.value = false
     }
   }
+  const fetchAllTransactionsWithRoles = async (token) => {
+  loading.value = true
+  error.value = null
+  try {
+    const response = await axios.get("http://localhost:8080/transactions/employee-alltransactions", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    transactions.value = response.data
+    return true
+  } catch (err) {
+    console.error('[store] fetchAllTransactionsWithRoles ❌', err)
+    error.value = err
+    transactions.value = []
+    return false
+  } finally {
+    loading.value = false
+  }
+}
+
 
   return {
     transactions,
@@ -89,6 +110,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     error,
     submitTransfer,
     fetchTransactions,
-    performEmployeeTransfer // ✅ Make sure this is here
+    performEmployeeTransfer, // ✅ Make sure this is here
+    fetchAllTransactionsWithRoles
   }
 })
