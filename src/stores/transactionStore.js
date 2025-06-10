@@ -29,24 +29,32 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
-  const performEmployeeTransfer = async (payload, token) => {
-    loading.value = true
-    error.value = null
-    try {
-      await axios.post("http://localhost:8080/transactions/employee-transfer", payload, {
+ const performEmployeeTransfer = async (payload, token) => {
+  console.log('[store] performEmployeeTransfer ▶ payload:', payload)
+  loading.value = true
+  error.value = null
+  try {
+    const resp = await axios.post(
+      "http://localhost:8080/transactions/employee-transfer",
+      payload,
+      {
         headers: {
           Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-      return true;
-    } catch (err) {
-      error.value = err
-      return false;
-    } finally {
-      loading.value = false;
-    }
-  };
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    console.log('[store] 200 OK:', resp.data)
+    return true
+  } catch (err) {
+    // Log entire axios error
+    console.error('[store] performEmployeeTransfer ❌ error', err, err.response?.data)
+    error.value = err
+    return false
+  } finally {
+    loading.value = false
+  }
+}
 
   // Fetch all transactions for a user
   const fetchTransactions = async (userId, filter) => {
