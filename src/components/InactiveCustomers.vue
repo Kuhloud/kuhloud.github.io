@@ -2,7 +2,7 @@
   <section class="py-4">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/')">← Back</button>
+        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
       </div>
 
       <h2 class="mb-4">Unapproved Customers</h2>

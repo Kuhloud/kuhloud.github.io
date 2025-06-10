@@ -2,10 +2,8 @@
   <section class="py-4">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/')">← Back</button>
-        <router-link to="/users/inactivelist" class="btn btn-outline-primary">
-          Activate Users →
-        </router-link>
+        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
+       
       </div>
 
       <h2 class="mb-4">Customer Overview</h2>

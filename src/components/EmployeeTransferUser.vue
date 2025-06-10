@@ -1,10 +1,14 @@
 <template>
   <div class="atm-container">
+       <div class="d-flex justify-content-between align-items-center mb-3">
+        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
+      </div>
     <div class="atm-header">
       <h2>Employee Transfer</h2>
       <p class="atm-subtitle">
         Employees can transfer between customer checking accounts.
       </p>
+      
     </div>
 
     <div class="atm-card">
