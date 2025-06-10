@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
-import {getAuthToken} from "@/utils/auth.js";
+import { getAuthToken } from "@/utils/auth.js";
 
 export const useTransactionStore = defineStore('transaction', () => {
   const transactions = ref([])
@@ -15,11 +15,11 @@ export const useTransactionStore = defineStore('transaction', () => {
       await axios.post(
         "http://localhost:8080/transactions/create",
         payload,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          })
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
       return true
     } catch (err) {
       error.value = err
@@ -28,6 +28,33 @@ export const useTransactionStore = defineStore('transaction', () => {
       loading.value = false
     }
   }
+
+ const performEmployeeTransfer = async (payload, token) => {
+  console.log('[store] performEmployeeTransfer ▶ payload:', payload)
+  loading.value = true
+  error.value = null
+  try {
+    const resp = await axios.post(
+      "http://localhost:8080/transactions/employee-transfer",
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    console.log('[store] 200 OK:', resp.data)
+    return true
+  } catch (err) {
+    // Log entire axios error
+    console.error('[store] performEmployeeTransfer ❌ error', err, err.response?.data)
+    error.value = err
+    return false
+  } finally {
+    loading.value = false
+  }
+}
 
   // Fetch all transactions for a user
   const fetchTransactions = async (userId, filter) => {
@@ -62,5 +89,6 @@ export const useTransactionStore = defineStore('transaction', () => {
     error,
     submitTransfer,
     fetchTransactions,
+    performEmployeeTransfer // ✅ Make sure this is here
   }
 })

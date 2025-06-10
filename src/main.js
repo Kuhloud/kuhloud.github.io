@@ -14,11 +14,17 @@ import MockATM from "@/components/MockATM.vue";
 import TransferHistory from "@/components/TransferHistory.vue";
 
 import User from "@/components/User.vue";
-import InactiveList from "@/components/inactiveCustomers.vue";
+import InactiveList from "@/components/InactiveCustomers.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import Profile from "@/components/profile/Profile.vue";
+
+
+import Toast from 'vue-toastification'
+import 'vue-toastification/dist/index.css'
+import EmployeeDashboard from "./components/EmployeeDashboard.vue";
 import IbanSearch from "@/components/IbanSearch.vue";
 import Home from "@/components/Home.vue";
+import EmployeeTransferUser from './components/EmployeeTransferUser.vue';
 // Initialize auth token if it exists
 const token = getAuthToken();
 if (token) {
@@ -69,9 +75,18 @@ const routes = [
     path: "/profile",
     component: Profile,
   },
+
+  {
+    path: "/employeedashboard",
+    component: EmployeeDashboard,
+  },
   {
     path: "/ibanSearch",
     component: IbanSearch,
+  },
+  {
+    path: "/employee-transfer",
+    component: EmployeeTransferUser,
   }
 ];
 
@@ -84,5 +99,6 @@ const app = createApp(App);
 
 app.use(router);
 app.use(createPinia());
+app.use(Toast)
 
 app.mount("#app");

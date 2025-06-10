@@ -2,7 +2,7 @@
   <section class="py-4">
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/')">← Back</button>
+        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
       </div>
 
       <h2 class="mb-4">Unapproved Customers</h2>
@@ -30,7 +30,9 @@
               <th>Email</th>
               <th>Phone</th>
               <th>Role</th>
-              <th class="text-center">Actions</th>
+              <th class="text-center">Daily Limit</th>
+              <th class="text-center">Absolute Limit</th>
+              <th class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
@@ -40,6 +42,22 @@
               <td>{{ user.email }}</td>
               <td>{{ user.phoneNumber }}</td>
               <td>{{ user.role }}</td>
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model.number="activationInputs[user.id].dailyLimit"
+                  placeholder="Daily limit"
+                />
+              </td>
+              <td>
+                <input
+                  type="number"
+                  class="form-control"
+                  v-model.number="activationInputs[user.id].absoluteLimit"
+                  placeholder="Absolute limit"
+                />
+              </td>
               <td class="text-center">
                 <button @click="approveCustomer(user.id)" class="btn btn-sm btn-outline-success">
                   Approve
@@ -63,19 +81,19 @@
 </template>
 
 <script>
-import { userStore } from "@/stores/userStore";
+import axios from '@/axios-auth';
+import { getAuthToken } from '@/utils/auth';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: "InactiveCustomerList",
-  setup() {
-    const uStore = userStore();
-    return { uStore };
-  },
   data() {
     return {
       users: [],
       currentPage: 1,
       pageLimit: 10,
+      activationInputs: {}, // { userId: { dailyLimit, absoluteLimit } }
+      toast: useToast()
     };
   },
   mounted() {
@@ -83,24 +101,64 @@ export default {
   },
   methods: {
     fetchUnapprovedCustomers() {
-      this.uStore.fetchUnapprovedCustomers(this.currentPage, this.pageLimit)
-        .then((result) => {
-          this.users = result;
-        })
-        .catch((err) => console.error("Failed to fetch users", err));
-    },
-    approveCustomer(id) {
-      this.uStore.approveCustomer(id)
-        .then(() => {
-          this.fetchUnapprovedCustomers();
+      const offset = (this.currentPage - 1) * this.pageLimit;
+      axios.get('/users/inactive', {
+        params: {
+          approved: false,
+          offset,
+          limit: this.pageLimit
+        },
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`
+        }
+      })
+      .then(res => {
+        this.users = res.data;
+        this.activationInputs = {};
+        res.data.forEach(user => {
+          this.activationInputs[user.id] = {
+            dailyLimit: 1000,
+            absoluteLimit: 500
+          };
         });
+      })
+      .catch(err => console.error("Failed to fetch users", err));
     },
-  },
+
+    approveCustomer(id) {
+      const input = this.activationInputs[id];
+      if (!input || input.dailyLimit == null || input.absoluteLimit == null) {
+        this.toast.error("Please enter both daily and absolute limits.");
+        return;
+      }
+
+      axios.post(`/users/${id}/activateuser`, {
+        dailyLimit: input.dailyLimit,
+        absoluteLimit: input.absoluteLimit
+      }, {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(() => {
+        this.fetchUnapprovedCustomers();
+        delete this.activationInputs[id];
+        this.toast.success("User successfully activated.");
+      })
+      .catch(err => {
+        const message = err?.response?.data?.message || err?.message || "Unknown error";
+        console.error("Activation failed:", message, err);
+        this.toast.error("Failed to activate user: " + message);
+      });
+    }
+  }
 };
 </script>
 
 <style scoped>
-.table th, .table td {
+.table th,
+.table td {
   vertical-align: middle;
 }
 </style>
