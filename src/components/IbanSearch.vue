@@ -35,7 +35,7 @@
           <tbody>
           <tr v-for="user in users" :key="user.id">
             <td>{{ user.firstName }} {{ user.lastName }}</td>
-            <td>{{ user.maskedIban }}</td>
+            <td>{{ user.iban }}</td>
           </tr>
           </tbody>
         </table>
