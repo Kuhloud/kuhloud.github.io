@@ -141,6 +141,7 @@ approveCustomer(id) {
           },
           withCredentials: true // ✅ Send cookies (if needed)
         });
+        console.log('User info fetched:', response.data);
         this.user = response.data;
       } catch (error) {
         console.error('Error fetching user:', error.response || error);
