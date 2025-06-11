@@ -146,28 +146,28 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useToast } from 'vue-toastification'
 import { useTransactionStore } from '@/stores/transactionStore'
 import { userStore } from '@/stores/userStore.js'
 import { getAuthToken } from '@/utils/auth.js'
 
+const toast = useToast()
 const transactionStore = useTransactionStore()
 const store = userStore()
 
 const userId = parseInt(localStorage.getItem('user_id'))
 const fromIban = ref('')
-const toIban   = ref('')
-const amount   = ref(null)
-const description = ref('')     // still a ref
-const message  = ref('')
-const messageType = ref('success')
+const toIban = ref('')
+const amount = ref(null)
+const description = ref('')
 const loading = ref(false)
 
 // Picker modal
 const showPicker = ref(false)
-const pickerTarget = ref('')  // 'from' or 'to'
+const pickerTarget = ref('')
 const firstName = ref('')
-const lastName  = ref('')
-const users     = ref([])
+const lastName = ref('')
+const users = ref([])
 
 function openPicker(target) {
   pickerTarget.value = target
@@ -194,64 +194,61 @@ async function searchUsers() {
     )
   } catch (err) {
     console.error('Search failed', err)
+    toast.error('Failed to search users.')
   }
 }
 
 // Pick a row
 function selectIban(u) {
   const iban = u.maskedIban ?? u.iban
-  if (pickerTarget.value==='from') fromIban.value = iban
+  if (pickerTarget.value === 'from') fromIban.value = iban
   else toIban.value = iban
   closePicker()
 }
 
 // Clear one field
 function clearField(which) {
-  if (which==='from') fromIban.value = ''
+  if (which === 'from') fromIban.value = ''
   else toIban.value = ''
-}
-
-// Feedback helper
-function showMessageFn(msg, type='danger') {
-  message.value = msg
-  messageType.value = type
-  setTimeout(()=> message.value='',4000)
 }
 
 // Transfer submit
 async function submitTransfer() {
   if (!fromIban.value || !toIban.value || !amount.value || !description.value) {
-    showMessageFn('Please fill in all fields.')
+    toast.warning('Please fill in all fields.')
     return
   }
+
   loading.value = true
 
-  // unwrap description.value instead of sending the ref itself
   const payload = {
     fromAccountIban: fromIban.value,
-    toAccountIban:   toIban.value,
-    amount:          parseFloat(amount.value),
-    description:     description.value,         
-    date:            new Date().toISOString(),
+    toAccountIban: toIban.value,
+    amount: parseFloat(amount.value),
+    description: description.value,
+    date: new Date().toISOString(),
     userInitiatingTransfer: userId
   }
 
   console.log('[UI] sending payload:', payload)
 
   const token = getAuthToken()
-  const success = await transactionStore.performEmployeeTransfer(payload, token)
-  if (success) {
-    showMessageFn('Transfer completed!', 'success')
+  const result = await transactionStore.performEmployeeTransfer(payload, token)
+
+  if (result.success) {
+    toast.success('Transfer completed!')
     fromIban.value = ''
-    toIban.value   = ''
-    amount.value   = null
+    toIban.value = ''
+    amount.value = null
     description.value = ''
   } else {
-    showMessageFn('Transfer failed, try again.')
+    toast.error(result.message || 'Transfer failed, try again.')
   }
+
   loading.value = false
 }
 </script>
+
 
 <style scoped>
 .atm-container {max-width:500px;margin:40px auto;padding:32px 24px;background:#f4f7fa;border-radius:16px;box-shadow:0 4px 24px rgba(60,80,120,0.08);color:#223046;font-family:'Segoe UI','Roboto',Arial,sans-serif;}

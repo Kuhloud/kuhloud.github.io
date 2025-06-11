@@ -29,10 +29,10 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
- const performEmployeeTransfer = async (payload, token) => {
-  console.log('[store] performEmployeeTransfer ▶ payload:', payload)
+const performEmployeeTransfer = async (payload, token) => {
   loading.value = true
   error.value = null
+
   try {
     const resp = await axios.post(
       "http://localhost:8080/transactions/employee-transfer",
@@ -44,17 +44,24 @@ export const useTransactionStore = defineStore('transaction', () => {
         },
       }
     )
-    console.log('[store] 200 OK:', resp.data)
-    return true
+    return { success: true, data: resp.data }
   } catch (err) {
-    // Log entire axios error
-    console.error('[store] performEmployeeTransfer ❌ error', err, err.response?.data)
-    error.value = err
-    return false
+    let backendMessage = 'Transfer failed due to an unknown error.'
+
+    if (err.response?.data) {
+      // If backend returned a string error (e.g. "Cannot use employee transfer for same user")
+      backendMessage = typeof err.response.data === 'string'
+        ? err.response.data
+        : err.response.data.message || backendMessage
+    }
+
+    console.error('[store] performEmployeeTransfer ❌:', backendMessage)
+    return { success: false, message: backendMessage }
   } finally {
     loading.value = false
   }
 }
+
 
   // Fetch all transactions for a user
   const fetchTransactions = async (userId, filter) => {
