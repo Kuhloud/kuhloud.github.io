@@ -1,18 +1,22 @@
 <template>
   <div class="atm-container">
-       <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
-      </div>
+    <!-- Top navigation bar with back button -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
+    </div>
+
+    <!-- Header -->
     <div class="atm-header">
       <h2>Employee Transfer</h2>
       <p class="atm-subtitle">
         Employees can transfer between customer checking accounts.
       </p>
-      
     </div>
 
+    <!-- Transfer form -->
     <div class="atm-card">
-      <!-- From IBAN with clear -->
+
+      <!-- From IBAN Picker -->
       <div class="form-group position-relative">
         <label for="fromIban">From IBAN:</label>
         <div class="d-flex">
@@ -24,18 +28,20 @@
             readonly
             placeholder="Select sender IBAN"
           />
+          <!-- Clear button for fromIban -->
           <button
             v-if="fromIban"
             class="btn btn-outline-danger clear-btn"
             @click="clearField('from')"
           >&times;</button>
+          <!-- Open picker modal -->
           <button class="btn btn-outline-secondary ms-2" @click="openPicker('from')">
             Pick
           </button>
         </div>
       </div>
 
-      <!-- To IBAN with clear -->
+      <!-- To IBAN Picker -->
       <div class="form-group position-relative">
         <label for="toIban">To IBAN:</label>
         <div class="d-flex">
@@ -47,18 +53,20 @@
             readonly
             placeholder="Select recipient IBAN"
           />
+          <!-- Clear button for toIban -->
           <button
             v-if="toIban"
             class="btn btn-outline-danger clear-btn"
             @click="clearField('to')"
           >&times;</button>
+          <!-- Open picker modal -->
           <button class="btn btn-outline-secondary ms-2" @click="openPicker('to')">
             Pick
           </button>
         </div>
       </div>
 
-      <!-- Amount & Description -->
+      <!-- Amount and description inputs -->
       <div class="form-group">
         <label for="amount">Amount:</label>
         <input
@@ -79,7 +87,7 @@
         ></textarea>
       </div>
 
-      <!-- Submit & Message -->
+      <!-- Submit button and result message -->
       <button class="btn-primary w-100" @click="submitTransfer" :disabled="loading">
         Transfer Funds
       </button>
@@ -92,6 +100,7 @@
       </div>
     </div>
 
+    <!-- Feature explanation -->
     <div class="atm-info-section">
       <h4>Employee Features</h4>
       <ul>
@@ -100,10 +109,11 @@
       </ul>
     </div>
 
-    <!-- Picker Modal -->
+    <!-- IBAN Picker Modal -->
     <div v-if="showPicker" class="modal-backdrop" @click.self="closePicker">
       <div class="modal-content">
         <h5>Search Customer</h5>
+        <!-- First name filter -->
         <div class="form-group mb-2">
           <input
             v-model="firstName"
@@ -112,6 +122,7 @@
             placeholder="First name"
           />
         </div>
+        <!-- Last name filter -->
         <div class="form-group mb-3">
           <input
             v-model="lastName"
@@ -120,6 +131,8 @@
             placeholder="Last name"
           />
         </div>
+
+        <!-- Results Table -->
         <div class="table-responsive">
           <table class="table table-hover">
             <thead>
@@ -128,7 +141,7 @@
             <tbody>
               <tr
                 v-for="u in users"
-                :key="u.id + (u.maskedIban||u.iban)"
+                :key="u.id + (u.maskedIban || u.iban)"
                 @click="selectIban(u)"
                 style="cursor:pointer;"
               >
@@ -138,11 +151,14 @@
             </tbody>
           </table>
         </div>
+
+        <!-- Close button -->
         <button class="btn btn-secondary mt-2 w-100" @click="closePicker">Close</button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script setup>
 import { ref } from 'vue'
@@ -151,10 +167,14 @@ import { useTransactionStore } from '@/stores/transactionStore'
 import { userStore } from '@/stores/userStore.js'
 import { getAuthToken } from '@/utils/auth.js'
 
+// Toast for success/failure messages
 const toast = useToast()
+
+// Pinia stores
 const transactionStore = useTransactionStore()
 const store = userStore()
 
+// Local state
 const userId = parseInt(localStorage.getItem('user_id'))
 const fromIban = ref('')
 const toIban = ref('')
@@ -162,13 +182,14 @@ const amount = ref(null)
 const description = ref('')
 const loading = ref(false)
 
-// Picker modal
+// Modal state for customer picker
 const showPicker = ref(false)
 const pickerTarget = ref('')
 const firstName = ref('')
 const lastName = ref('')
 const users = ref([])
 
+// Open the customer picker (for 'from' or 'to' IBAN)
 function openPicker(target) {
   pickerTarget.value = target
   showPicker.value = true
@@ -177,11 +198,12 @@ function openPicker(target) {
   users.value = []
 }
 
+// Close picker modal
 function closePicker() {
   showPicker.value = false
 }
 
-// Live search
+// Search users by name
 async function searchUsers() {
   if (!firstName.value && !lastName.value) {
     users.value = []
@@ -198,7 +220,7 @@ async function searchUsers() {
   }
 }
 
-// Pick a row
+// Set selected IBAN from modal
 function selectIban(u) {
   const iban = u.maskedIban ?? u.iban
   if (pickerTarget.value === 'from') fromIban.value = iban
@@ -206,14 +228,15 @@ function selectIban(u) {
   closePicker()
 }
 
-// Clear one field
+// Clear an input field
 function clearField(which) {
   if (which === 'from') fromIban.value = ''
   else toIban.value = ''
 }
 
-// Transfer submit
+// Submit transfer
 async function submitTransfer() {
+  // Validate input fields
   if (!fromIban.value || !toIban.value || !amount.value || !description.value) {
     toast.warning('Please fill in all fields.')
     return
@@ -237,6 +260,7 @@ async function submitTransfer() {
 
   if (result.success) {
     toast.success('Transfer completed!')
+    // Reset form
     fromIban.value = ''
     toIban.value = ''
     amount.value = null
@@ -248,6 +272,7 @@ async function submitTransfer() {
   loading.value = false
 }
 </script>
+
 
 
 <style scoped>
