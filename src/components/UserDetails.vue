@@ -5,7 +5,6 @@
       <h2 class="m-0">User Details</h2>
     </div>
 
-    <!-- ✅ Alleen tonen als 'user' geladen is -->
     <div v-if="user" class="card p-4 mb-4 shadow-sm">
       <h4 class="mb-3">Personal Information</h4>
       <div class="row">
@@ -18,7 +17,42 @@
       </div>
     </div>
 
-    <!-- Transacties, ook pas tonen als geladen -->
+    <div class="card p-4 shadow-sm mb-4">
+      <h4 class="mb-3">Transaction Filters</h4>
+      <form class="row g-3">
+        <div class="col-md-2">
+          <label class="form-label">Start Date</label>
+          <input type="date" v-model="filters.startDate" class="form-control" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">End Date</label>
+          <input type="date" v-model="filters.endDate" class="form-control" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">From IBAN</label>
+          <input type="text" v-model="filters.fromIban" class="form-control" />
+        </div>
+        <div class="col-md-2">
+          <label class="form-label">To IBAN</label>
+          <input type="text" v-model="filters.toIban" class="form-control" />
+        </div>
+        <div class="col-md-3">
+          <label class="form-label">Amount</label>
+          <div class="input-group">
+            <select v-model="filters.amountOperator" class="form-select" style="max-width: 70px;">
+              <option value="eq">=</option>
+              <option value="lt">&lt;</option>
+              <option value="gt">&gt;</option>
+            </select>
+            <input type="number" v-model.number="filters.amount" class="form-control" />
+          </div>
+        </div>
+        <div class="col-md-1 d-flex align-items-end">
+          <button @click.prevent="resetFilters" class="btn btn-outline-secondary w-100">Reset</button>
+        </div>
+      </form>
+    </div>
+
     <div class="card p-4 shadow-sm">
       <h4 class="mb-3">Transaction History</h4>
       <div class="table-responsive">
@@ -33,7 +67,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="tx in transactions" :key="tx.id">
+          <tr v-for="tx in filteredTransactions" :key="tx.id">
               <td>{{ formatDate(tx.date) }}</td>
               <td>{{ tx.fromAccountIban }}</td>
               <td>{{ tx.toAccountIban }}</td>
@@ -44,23 +78,22 @@
         </table>
       </div>
     </div>
-  </div>
 
-  <!-- ✅ Editable Limits -->
-<div v-if="user" class="card p-4 mb-4 shadow-sm">
-  <h4 class="mb-3">Limits</h4>
-  <div class="row">
-    <div class="col-md-6 mb-3">
-      <label for="dailyLimit" class="form-label">Daily Limit</label>
-      <input type="number" id="dailyLimit" v-model="editDailyLimit" class="form-control" />
-    </div>
-    <div class="col-md-6 mb-3">
-      <label for="absoluteLimit" class="form-label">Absolute Limit (CHECKING)</label>
-      <input type="number" id="absoluteLimit" v-model="editAbsoluteLimit" class="form-control" />
+    <div v-if="user" class="card p-4 mb-4 shadow-sm">
+      <h4 class="mb-3">Limits</h4>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label for="dailyLimit" class="form-label">Daily Limit</label>
+          <input type="number" id="dailyLimit" v-model="editDailyLimit" class="form-control" />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label for="absoluteLimit" class="form-label">Absolute Limit (CHECKING)</label>
+          <input type="number" id="absoluteLimit" v-model="editAbsoluteLimit" class="form-control" />
+        </div>
+      </div>
+      <button @click="updateLimits" class="btn btn-success">Save Limits</button>
     </div>
   </div>
-  <button @click="updateLimits" class="btn btn-success">Save Limits</button>
-</div>
 </template>
 
 <script>
@@ -72,15 +105,24 @@ export default {
   data() {
     return {
       user: null,
-      transactions: [],
+      allTransactions: [],       // all fetched transactions
+      filteredTransactions: [],  // only transactions for this user
+      userIbans: [],             // user's own IBANs
       editDailyLimit: 0,
       editAbsoluteLimit: 0,
       checkingAccountId: null,
+      filters: {
+        startDate: "",
+        endDate: "",
+        fromIban: "",
+        toIban: "",
+        amount: "",
+        amountOperator: "eq"
+      }
     };
   },
   mounted() {
     this.loadUser();
-    this.loadTransactions();
   },
   methods: {
     loadUser() {
@@ -99,6 +141,12 @@ export default {
           this.editAbsoluteLimit = checking.absoluteLimit;
           this.checkingAccountId = checking.id;
         }
+
+        // Store user's IBANs
+        this.userIbans = res.data.accounts.map(acc => acc.iban);
+
+        // Now load transactions
+        this.loadTransactions();
       })
       .catch(err => {
         console.error("Failed to load user", err);
@@ -109,53 +157,76 @@ export default {
       const id = this.$route.params.id;
       axios.get(`/transactions/user/${id}`, {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
+        params: this.filters
       })
-        .then(res => (this.transactions = res.data))
+        .then(res => {
+          this.allTransactions = res.data;
+          this.filterToUserTransactions();
+        })
         .catch(err => console.error("Failed to load transactions", err));
     },
+   filterToUserTransactions() {
+  console.log("User IBANs:", this.userIbans);
+  console.log("All transactions:", this.allTransactions);
+
+  this.filteredTransactions = this.allTransactions.filter(tx =>
+    this.userIbans.includes(tx.fromAccountIban) || this.userIbans.includes(tx.toAccountIban)
+  );
+
+  console.log("Filtered transactions:", this.filteredTransactions);
+},
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString();
+    },
+    resetFilters() {
+      this.filters = {
+        startDate: "",
+        endDate: "",
+        fromIban: "",
+        toIban: "",
+        amount: "",
+        amountOperator: "eq"
+      };
+      this.loadTransactions();
     },
     updateLimits() {
       const toast = useToast();
       const userId = this.user.id;
       const token = getAuthToken();
 
-      // ✅ 1. Update Daily Limit
       axios.patch(`/users/${userId}/dailyLimit`, {
         dailyLimit: this.editDailyLimit
       }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+        headers: { Authorization: `Bearer ${token}` }
       })
-      .then(() => {
-        toast.success("Daily limit updated");
-      })
+      .then(() => toast.success("Daily limit updated"))
       .catch(err => {
         toast.error("Failed to update daily limit");
-        console.error('Failed to update daily limit:', err);
+        console.error(err);
       });
 
-      // ✅ 2. Update Absolute Limit
       if (this.checkingAccountId !== null) {
         axios.patch(`/accounts/${this.checkingAccountId}/absoluteLimit`, {
           absoluteLimit: this.editAbsoluteLimit
         }, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          headers: { Authorization: `Bearer ${token}` }
         })
-        .then(() => {
-          toast.success("Absolute limit updated");
-        })
+        .then(() => toast.success("Absolute limit updated"))
         .catch(err => {
           toast.error("Failed to update absolute limit");
-          console.error('Failed to update absolute limit:', err);
+          console.error(err);
         });
       }
     }
   },
+  watch: {
+    filters: {
+      deep: true,
+      handler() {
+        this.loadTransactions();
+      }
+    }
+  }
 };
 </script>
 
