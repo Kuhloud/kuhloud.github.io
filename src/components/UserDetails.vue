@@ -67,7 +67,7 @@
             </tr>
           </thead>
           <tbody>
-          <tr v-for="tx in filteredTransactions" :key="tx.id">
+            <tr v-for="tx in filteredTransactions" :key="tx.id">
               <td>{{ formatDate(tx.date) }}</td>
               <td>{{ tx.fromAccountIban }}</td>
               <td>{{ tx.toAccountIban }}</td>
@@ -84,11 +84,23 @@
       <div class="row">
         <div class="col-md-6 mb-3">
           <label for="dailyLimit" class="form-label">Daily Limit</label>
-          <input type="number" id="dailyLimit" v-model="editDailyLimit" class="form-control" />
+          <input
+            type="number"
+            id="dailyLimit"
+            v-model="editDailyLimit"
+            class="form-control"
+            min="0"
+          />
         </div>
         <div class="col-md-6 mb-3">
           <label for="absoluteLimit" class="form-label">Absolute Limit (CHECKING)</label>
-          <input type="number" id="absoluteLimit" v-model="editAbsoluteLimit" class="form-control" />
+          <input
+            type="number"
+            id="absoluteLimit"
+            v-model="editAbsoluteLimit"
+            class="form-control"
+            min="0"
+          />
         </div>
       </div>
       <button @click="updateLimits" class="btn btn-success">Save Limits</button>
@@ -105,9 +117,9 @@ export default {
   data() {
     return {
       user: null,
-      allTransactions: [],       // all fetched transactions
-      filteredTransactions: [],  // only transactions for this user
-      userIbans: [],             // user's own IBANs
+      allTransactions: [],
+      filteredTransactions: [],
+      userIbans: [],
       editDailyLimit: 0,
       editAbsoluteLimit: 0,
       checkingAccountId: null,
@@ -142,10 +154,7 @@ export default {
           this.checkingAccountId = checking.id;
         }
 
-        // Store user's IBANs
         this.userIbans = res.data.accounts.map(acc => acc.iban);
-
-        // Now load transactions
         this.loadTransactions();
       })
       .catch(err => {
@@ -159,22 +168,17 @@ export default {
         headers: { Authorization: `Bearer ${getAuthToken()}` },
         params: this.filters
       })
-        .then(res => {
-          this.allTransactions = res.data;
-          this.filterToUserTransactions();
-        })
-        .catch(err => console.error("Failed to load transactions", err));
+      .then(res => {
+        this.allTransactions = res.data;
+        this.filterToUserTransactions();
+      })
+      .catch(err => console.error("Failed to load transactions", err));
     },
-   filterToUserTransactions() {
-  console.log("User IBANs:", this.userIbans);
-  console.log("All transactions:", this.allTransactions);
-
-  this.filteredTransactions = this.allTransactions.filter(tx =>
-    this.userIbans.includes(tx.fromAccountIban) || this.userIbans.includes(tx.toAccountIban)
-  );
-
-  console.log("Filtered transactions:", this.filteredTransactions);
-},
+    filterToUserTransactions() {
+      this.filteredTransactions = this.allTransactions.filter(tx =>
+        this.userIbans.includes(tx.fromAccountIban) || this.userIbans.includes(tx.toAccountIban)
+      );
+    },
     formatDate(dateStr) {
       return new Date(dateStr).toLocaleDateString();
     },
@@ -193,6 +197,12 @@ export default {
       const toast = useToast();
       const userId = this.user.id;
       const token = getAuthToken();
+
+      // Prevent negative values
+      if (this.editDailyLimit < 0 || this.editAbsoluteLimit < 0) {
+        toast.error("Limits must be zero or positive numbers.");
+        return;
+      }
 
       axios.patch(`/users/${userId}/dailyLimit`, {
         dailyLimit: this.editDailyLimit

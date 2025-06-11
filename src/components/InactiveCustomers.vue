@@ -1,12 +1,14 @@
 <template>
   <section class="py-4">
     <div class="container">
+      <!-- Back button -->
       <div class="d-flex justify-content-between align-items-center mb-3">
         <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
       </div>
 
       <h2 class="mb-4">Unapproved Customers</h2>
 
+      <!-- Page limit input -->
       <div class="mb-3 row align-items-center">
         <label for="limit" class="col-sm-2 col-form-label">Page Limit</label>
         <div class="col-sm-2">
@@ -21,6 +23,7 @@
         </div>
       </div>
 
+      <!-- Unapproved user table -->
       <div class="table-responsive">
         <table class="table table-bordered table-striped align-middle">
           <thead class="table-dark">
@@ -46,6 +49,7 @@
                 <input
                   type="number"
                   class="form-control"
+                  min="0"
                   v-model.number="activationInputs[user.id].dailyLimit"
                   placeholder="Daily limit"
                 />
@@ -54,6 +58,7 @@
                 <input
                   type="number"
                   class="form-control"
+                  min="0"
                   v-model.number="activationInputs[user.id].absoluteLimit"
                   placeholder="Absolute limit"
                 />
@@ -68,6 +73,7 @@
         </table>
       </div>
 
+      <!-- Pagination -->
       <div class="d-flex justify-content-center mt-4">
         <vue-awesome-paginate
           :items-per-page="pageLimit"
@@ -92,7 +98,7 @@ export default {
       users: [],
       currentPage: 1,
       pageLimit: 10,
-      activationInputs: {}, // { userId: { dailyLimit, absoluteLimit } }
+      activationInputs: {}, // Stores user ID → daily/absolute limit values
       toast: useToast()
     };
   },
@@ -100,8 +106,10 @@ export default {
     this.fetchUnapprovedCustomers();
   },
   methods: {
+    // Fetch paginated list of unapproved users
     fetchUnapprovedCustomers() {
       const offset = (this.currentPage - 1) * this.pageLimit;
+
       axios.get('/users/inactive', {
         params: {
           approved: false,
@@ -114,6 +122,8 @@ export default {
       })
       .then(res => {
         this.users = res.data;
+
+        // Initialize default input values for activation form
         this.activationInputs = {};
         res.data.forEach(user => {
           this.activationInputs[user.id] = {
@@ -125,13 +135,22 @@ export default {
       .catch(err => console.error("Failed to fetch users", err));
     },
 
+    // Approve and activate a user with limits
     approveCustomer(id) {
       const input = this.activationInputs[id];
+
+      // Basic input validation
       if (!input || input.dailyLimit == null || input.absoluteLimit == null) {
         this.toast.error("Please enter both daily and absolute limits.");
         return;
       }
 
+      if (input.dailyLimit < 0 || input.absoluteLimit < 0) {
+        this.toast.error("Limits must be zero or positive numbers.");
+        return;
+      }
+
+      // Send activation request
       axios.post(`/users/${id}/activateuser`, {
         dailyLimit: input.dailyLimit,
         absoluteLimit: input.absoluteLimit
@@ -142,8 +161,8 @@ export default {
         }
       })
       .then(() => {
-        this.fetchUnapprovedCustomers();
-        delete this.activationInputs[id];
+        this.fetchUnapprovedCustomers(); // Refresh table
+        delete this.activationInputs[id]; // Clear input state
         this.toast.success("User successfully activated.");
       })
       .catch(err => {

@@ -30,7 +30,7 @@
 </template>
 
 <script setup>
-// No additional logic needed—this is purely navigational.
+
 </script>
 
 <style scoped>
