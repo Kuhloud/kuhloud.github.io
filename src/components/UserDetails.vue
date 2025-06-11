@@ -66,6 +66,7 @@
 <script>
 import axios from '@/axios-auth';
 import { getAuthToken } from "@/utils/auth";
+import { useToast } from "vue-toastification";
 
 export default {
   data() {
@@ -74,7 +75,7 @@ export default {
       transactions: [],
       editDailyLimit: 0,
       editAbsoluteLimit: 0,
-      checkingAccountId: null
+      checkingAccountId: null,
     };
   },
   mounted() {
@@ -98,8 +99,6 @@ export default {
           this.editAbsoluteLimit = checking.absoluteLimit;
           this.checkingAccountId = checking.id;
         }
-
-        console.log("User loaded:", this.user);
       })
       .catch(err => {
         console.error("Failed to load user", err);
@@ -118,6 +117,7 @@ export default {
       return new Date(dateStr).toLocaleDateString();
     },
     updateLimits() {
+      const toast = useToast();
       const userId = this.user.id;
       const token = getAuthToken();
 
@@ -130,13 +130,14 @@ export default {
         }
       })
       .then(() => {
-        console.log('Daily limit updated');
+        toast.success("Daily limit updated");
       })
       .catch(err => {
+        toast.error("Failed to update daily limit");
         console.error('Failed to update daily limit:', err);
       });
 
-      // ✅ 2. Update Absolute Limit (on account)
+      // ✅ 2. Update Absolute Limit
       if (this.checkingAccountId !== null) {
         axios.patch(`/accounts/${this.checkingAccountId}/absoluteLimit`, {
           absoluteLimit: this.editAbsoluteLimit
@@ -146,16 +147,16 @@ export default {
           }
         })
         .then(() => {
-          console.log('Absolute limit updated');
+          toast.success("Absolute limit updated");
         })
         .catch(err => {
+          toast.error("Failed to update absolute limit");
           console.error('Failed to update absolute limit:', err);
         });
       }
     }
   },
 };
-
 </script>
 
 <style scoped>
