@@ -107,8 +107,7 @@ const performAction = async () => {
       toAccountIban: action.value === "deposit" ? checkingAccount.value.iban : "ATM",
       amount: parseFloat(amount.value),
       description: action.value === "deposit" ? "ATM Deposit" : "ATM Withdrawal",
-      date: new Date().toISOString(),
-      userInitiatingTransfer: parseInt(userId)
+      date: new Date().toISOString()
     };
     const success = await transactionStore.submitTransfer(payload, token);
     if (success) {

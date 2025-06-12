@@ -182,8 +182,7 @@ export default {
             : toIban.value,
         amount: parseFloat(amount.value),
         description: description.value,
-        date: new Date().toISOString(),
-        userInitiatingTransfer: parseInt(userId),
+        date: new Date().toISOString()
       };
 
       const success = await transactionStore.submitTransfer(payload, token);
