@@ -5,51 +5,43 @@
     </router-link>
     <h1>Transfer Money</h1>
 
-    <!-- Message Box -->
     <div v-if="message" :class="['alert', messageType === 'success' ? 'alert-success' : 'alert-danger']" role="alert">
       {{ message }}
     </div>
 
-    <!-- Transfer Type Toggle -->
     <div class="form-group">
       <label>Transfer Type:</label>
       <div>
         <label>
-          <input
-            type="radio"
-            value="own"
-            v-model="transferType"
-          />
+          <input type="radio" value="own" v-model="transferType" />
           Between My Accounts
         </label>
         <label>
-          <input
-            type="radio"
-            value="external"
-            v-model="transferType"
-          />
+          <input type="radio" value="external" v-model="transferType" />
           To Someone Else
         </label>
       </div>
     </div>
 
-    <!-- Select Bank Account -->
     <div class="form-group">
       <label for="fromAccount">Select Account to Transfer From:</label>
       <select v-model="selectedAccount" id="fromAccount" class="form-control">
-        <option v-for="account in accounts" :key="account.id + '-' + account.balance" :value="account">
+        <option
+          v-for="account in filteredFromAccounts"
+          :key="account.id"
+          :value="account"
+        >
           {{ account.name }} - {{ account.balance }} €
         </option>
       </select>
     </div>
 
-    <!-- Transfer Details -->
     <div v-if="transferType === 'own'" class="form-group">
       <label for="toAccount">Select Account to Transfer To:</label>
       <select v-model="toAccount" id="toAccount" class="form-control">
         <option
           v-for="account in accounts"
-          :key="account.id + '-' + account.balance"
+          :key="account.id"
           :value="account"
           :disabled="account.id === selectedAccount?.id"
         >
@@ -90,7 +82,6 @@
       ></textarea>
     </div>
 
-    <!-- Submit Button -->
     <button @click="submitTransfer" class="btn-primary">Transfer</button>
 
     <div class="transfer-info-section">
@@ -108,15 +99,14 @@
 </template>
 
 <script>
-import { ref, onMounted, computed } from "vue";
-import { useRouter } from "vue-router"; // Import useRouter
+import { ref, onMounted, computed, watch } from "vue";
+import { useRouter } from "vue-router";
 import { useAccountStore } from "@/stores/accountStore";
 import { useTransactionStore } from "@/stores/transactionStore";
-import axios from "axios";
 
 export default {
   setup() {
-    const router = useRouter(); // Initialize router
+    const router = useRouter();
     const accountStore = useAccountStore();
     const transactionStore = useTransactionStore();
     const transferType = ref("own");
@@ -127,7 +117,6 @@ export default {
     const description = ref("");
     const userId = localStorage.getItem("user_id");
 
-    // Redirect to login if not logged in
     onMounted(() => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -139,9 +128,12 @@ export default {
       }
     });
 
-    // Message state
+    watch(transferType, () => {
+      selectedAccount.value = null;
+    });
+
     const message = ref("");
-    const messageType = ref("success"); // 'success' or 'danger'
+    const messageType = ref("success");
 
     const showMessage = (msg, type = "danger") => {
       message.value = msg;
@@ -153,22 +145,27 @@ export default {
 
     const submitTransfer = async () => {
       const token = localStorage.getItem("token");
+
       if (!selectedAccount.value) {
         showMessage("Please select an account to transfer from.");
         return;
       }
+
       if (transferType.value === "own" && !toAccount.value) {
         showMessage("Please select an account to transfer to.");
         return;
       }
+
       if (transferType.value === "external" && !toIban.value) {
         showMessage("Please enter the recipient's IBAN.");
         return;
       }
+
       if (!amount.value || amount.value <= 0) {
         showMessage("Amount must be greater than zero.");
         return;
       }
+
       if (!description.value) {
         showMessage("Please enter a description.");
         return;
@@ -192,7 +189,7 @@ export default {
         toIban.value = "";
         amount.value = "";
         description.value = "";
-        // Refresh accounts after transfer and reset selection
+
         if (userId) {
           await accountStore.fetchAccounts(userId);
           selectedAccount.value = null;
@@ -203,8 +200,17 @@ export default {
       }
     };
 
+    const filteredFromAccounts = computed(() => {
+      if (transferType.value === "own") {
+        return accountStore.accounts;
+      } else {
+        return accountStore.accounts.filter(acc => acc.accountType === "CHECKING");
+      }
+    });
+
     return {
       accounts: computed(() => accountStore.accounts),
+      filteredFromAccounts,
       transferType,
       selectedAccount,
       toAccount,
