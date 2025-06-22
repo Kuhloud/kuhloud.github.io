@@ -3,7 +3,9 @@
     <div class="container">
       <!-- Back button -->
       <div class="d-flex justify-content-between align-items-center mb-3">
-        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
+        <button class="btn btn-danger" @click="$router.push('/employeedashboard')">
+          ← Back
+        </button>
       </div>
 
       <h2 class="mb-4">Unapproved Customers</h2>
@@ -64,7 +66,10 @@
                 />
               </td>
               <td class="text-center">
-                <button @click="approveCustomer(user.id)" class="btn btn-sm btn-outline-success">
+                <button
+                  @click="approveCustomer(user.id)"
+                  class="btn btn-sm btn-outline-success"
+                >
                   Approve
                 </button>
               </td>
@@ -98,7 +103,7 @@ export default {
       users: [],
       currentPage: 1,
       pageLimit: 10,
-      activationInputs: {}, // Stores user ID → daily/absolute limit values
+      activationInputs: {}, // userId → { dailyLimit, absoluteLimit }
       toast: useToast()
     };
   },
@@ -106,64 +111,53 @@ export default {
     this.fetchUnapprovedCustomers();
   },
   methods: {
-    // Fetch paginated list of unapproved users
     fetchUnapprovedCustomers() {
       const offset = (this.currentPage - 1) * this.pageLimit;
 
       axios.get('/users/inactive', {
-        params: {
-          approved: false,
-          offset,
-          limit: this.pageLimit
-        },
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`
-        }
+        params: { approved: false, offset, limit: this.pageLimit },
+        headers: { Authorization: `Bearer ${getAuthToken()}` }
       })
       .then(res => {
-        this.users = res.data;
-
-        // Initialize default input values for activation form
-        this.activationInputs = {};
+        // build inputs _before_ assigning users
+        const inputs = {};
         res.data.forEach(user => {
-          this.activationInputs[user.id] = {
-            dailyLimit: 1000,
-            absoluteLimit: 500
-          };
+          inputs[user.id] = { dailyLimit: 1000, absoluteLimit: 500 };
         });
+        this.activationInputs = inputs;
+        this.users = res.data;
       })
       .catch(err => console.error("Failed to fetch users", err));
     },
 
-    // Approve and activate a user with limits
     approveCustomer(id) {
       const input = this.activationInputs[id];
-
-      // Basic input validation
       if (!input || input.dailyLimit == null || input.absoluteLimit == null) {
         this.toast.error("Please enter both daily and absolute limits.");
         return;
       }
-
       if (input.dailyLimit < 0 || input.absoluteLimit < 0) {
         this.toast.error("Limits must be zero or positive numbers.");
         return;
       }
 
-      // Send activation request
-      axios.post(`/users/${id}/activateuser`, {
-        dailyLimit: input.dailyLimit,
-        absoluteLimit: input.absoluteLimit
-      }, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          'Content-Type': 'application/json'
+      axios.post('/users/activateuser',
+        {
+          userId: id,
+          dailyLimit: input.dailyLimit,
+          absoluteLimit: input.absoluteLimit
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+            'Content-Type': 'application/json'
+          }
         }
-      })
+      )
       .then(() => {
-        this.fetchUnapprovedCustomers(); // Refresh table
-        delete this.activationInputs[id]; // Clear input state
         this.toast.success("User successfully activated.");
+        // just re-fetch; no delete() so we never hit an undefined during render
+        this.fetchUnapprovedCustomers();
       })
       .catch(err => {
         const message = err?.response?.data?.message || err?.message || "Unknown error";
