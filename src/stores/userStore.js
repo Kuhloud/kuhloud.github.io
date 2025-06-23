@@ -12,7 +12,6 @@ export const userStore = defineStore('store', {
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
-    //getUserId: (state) => state.user_id,
     isEmployee: (state) => state.role === 'ROLE_EMPLOYEE',
   },
   actions: {
@@ -131,11 +130,11 @@ approveCustomer(id) {
 
 
 ,
-    async getUserInfo(user_id) {
+    async getUserInfo() {
       console.log("Current axios defaults:", axios.defaults.headers.common)
       console.log('Authorization header:', getAuthToken())
       try {
-        const response = await axios.get(`/users/profile/${user_id}`, {
+        const response = await axios.get(`/users/profile`, {
           headers: {
             Authorization: `Bearer ${this.token}` // ✅ Attach token
           },
