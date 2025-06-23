@@ -18,7 +18,6 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: './index.html',
-        404: './404.html' // For GitHub Pages fallback
       }
     }
   }

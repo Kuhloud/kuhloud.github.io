@@ -68,13 +68,12 @@ export default {
     const uStore = userStore();
     const user = computed(() => uStore.user);
     const accounts = computed(() => user.value?.accounts || []);
-    const user_id = localStorage.getItem("user_id");
     onMounted(
         async () => {
           try {
             console.log('fetching user info')
             // await accountStore.fetchAccounts(user_id);
-            await uStore.getUserInfo(user_id);
+            await uStore.getUserInfo();
           } catch (error) {
             console.error("Failed to fetch user:", error);
           }
