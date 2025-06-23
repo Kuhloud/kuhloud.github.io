@@ -1,4 +1,4 @@
-import { createRouter, createWebHashHistory } from '/vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import { getAuthToken, setAuthToken } from "@/utils/auth";
 import { createPinia } from "pinia";
 
