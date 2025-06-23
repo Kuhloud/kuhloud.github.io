@@ -9,6 +9,7 @@ export const userStore = defineStore('store', {
     user_id: 0,
     role: '',
     user: null,
+    selectedUserId: null,
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
@@ -157,6 +158,13 @@ getAllUsers(page, limit) {
       localStorage.removeItem('user_id')
       localStorage.removeItem('role')
       axios.defaults.headers.common['Authorization'] = ''
-    }
+    },
+
+    setSelectedUserId(id) {
+     this.selectedUserId = id;
+    },
+    clearSelectedUserId() {
+    this.selectedUserId = null;
+}
   }
 })

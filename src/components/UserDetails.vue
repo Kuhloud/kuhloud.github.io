@@ -108,137 +108,145 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { ref, reactive, onMounted, watch } from 'vue';
 import axios from '@/axios-auth';
 import { getAuthToken } from "@/utils/auth";
 import { useToast } from "vue-toastification";
+import { userStore as useUserStore } from '@/stores/userStore.js';
 
-export default {
-  data() {
-    return {
-      user: null,
-      allTransactions: [],
-      filteredTransactions: [],
-      userIbans: [],
-      editDailyLimit: 0,
-      editAbsoluteLimit: 0,
-      checkingAccountId: null,
-      filters: {
-        startDate: "",
-        endDate: "",
-        fromIban: "",
-        toIban: "",
-        amount: "",
-        amountOperator: "eq"
-      }
-    };
-  },
-  mounted() {
-    this.loadUser();
-  },
-  methods: {
-    loadUser() {
-      const id = this.$route.params.id;
-      axios.get(`/users/${id}`, {
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`
-        }
-      })
-      .then(res => {
-        this.user = res.data;
-        this.editDailyLimit = res.data.dailyLimit;
+const store = useUserStore();
+const toast = useToast();
 
-        const checking = res.data.accounts.find(acc => acc.accountType === 'CHECKING');
-        if (checking) {
-          this.editAbsoluteLimit = checking.absoluteLimit;
-          this.checkingAccountId = checking.id;
-        }
+const user = ref(null);
+const allTransactions = ref([]);
+const filteredTransactions = ref([]);
+const userIbans = ref([]);
+const editDailyLimit = ref(0);
+const editAbsoluteLimit = ref(0);
+const checkingAccountId = ref(null);
+const filters = reactive({
+  startDate: "",
+  endDate: "",
+  fromIban: "",
+  toIban: "",
+  amount: "",
+  amountOperator: "eq"
+});
 
-        this.userIbans = res.data.accounts.map(acc => acc.iban);
-        this.loadTransactions();
-      })
-      .catch(err => {
-        console.error("Failed to load user", err);
-        this.user = null;
-      });
-    },
-    loadTransactions() {
-      const id = this.$route.params.id;
-      axios.get(`/transactions/user/${id}`, {
-        headers: { Authorization: `Bearer ${getAuthToken()}` },
-        params: this.filters
-      })
-      .then(res => {
-        this.allTransactions = res.data;
-        this.filterToUserTransactions();
-      })
-      .catch(err => console.error("Failed to load transactions", err));
-    },
-    filterToUserTransactions() {
-      this.filteredTransactions = this.allTransactions.filter(tx =>
-        this.userIbans.includes(tx.fromAccountIban) || this.userIbans.includes(tx.toAccountIban)
-      );
-    },
-    formatDate(dateStr) {
-      return new Date(dateStr).toLocaleDateString();
-    },
-    resetFilters() {
-      this.filters = {
-        startDate: "",
-        endDate: "",
-        fromIban: "",
-        toIban: "",
-        amount: "",
-        amountOperator: "eq"
-      };
-      this.loadTransactions();
-    },
-    updateLimits() {
-      const toast = useToast();
-      const userId = this.user.id;
-      const token = getAuthToken();
+const loadUser = async () => {
+  const id = store.selectedUserId;
+  if (!id) {
+    console.error("No selected user ID found in store.");
+    return;
+  }
 
-      // Prevent negative values
-      if (this.editDailyLimit < 0 || this.editAbsoluteLimit < 0) {
-        toast.error("Limits must be zero or positive numbers.");
-        return;
-      }
+  try {
+    const res = await axios.post(`/users/details`, { userId: id }, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` }
+    });
+    
+    user.value = res.data;
+    editDailyLimit.value = res.data.dailyLimit;
 
-      axios.patch(`/users/${userId}/dailyLimit`, {
-        dailyLimit: this.editDailyLimit
+    const checking = res.data.accounts.find(acc => acc.accountType === 'CHECKING');
+    if (checking) {
+      editAbsoluteLimit.value = checking.absoluteLimit;
+      checkingAccountId.value = checking.id;
+    }
+
+    userIbans.value = res.data.accounts.map(acc => acc.iban);
+    await loadTransactions();
+  } catch (err) {
+    console.error("Failed to load user", err);
+    user.value = null;
+  }
+};
+
+const loadTransactions = async () => {
+  const id = store.selectedUserId;
+  if (!id) {
+    console.error("No selected user ID found in store.");
+    return;
+  }
+
+  try {
+    const res = await axios.get(`/transactions/user/${id}`, {
+      headers: { Authorization: `Bearer ${getAuthToken()}` },
+      params: filters
+    });
+    allTransactions.value = res.data;
+    filterToUserTransactions();
+  } catch (err) {
+    console.error("Failed to load transactions", err);
+  }
+};
+
+const filterToUserTransactions = () => {
+  filteredTransactions.value = allTransactions.value.filter(tx =>
+    userIbans.value.includes(tx.fromAccountIban) || userIbans.value.includes(tx.toAccountIban)
+  );
+};
+
+const formatDate = (dateStr) => {
+  return new Date(dateStr).toLocaleDateString();
+};
+
+const resetFilters = () => {
+  filters.startDate = "";
+  filters.endDate = "";
+  filters.fromIban = "";
+  filters.toIban = "";
+  filters.amount = "";
+  filters.amountOperator = "eq";
+  loadTransactions();
+};
+
+const updateLimits = async () => {
+  const userId = user.value.id;
+  const token = getAuthToken();
+
+  if (editDailyLimit.value < 0) {
+    toast.error("Limits must be zero or positive numbers.");
+    return;
+  }
+
+  try {
+    await axios.patch(`/users/${userId}/dailyLimit`, {
+      dailyLimit: editDailyLimit.value
+    }, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    toast.success("Daily limit updated");
+  } catch (err) {
+    toast.error("Failed to update daily limit");
+    console.error(err);
+  }
+
+  if (checkingAccountId.value !== null) {
+    try {
+      await axios.patch(`/accounts/${checkingAccountId.value}/absoluteLimit`, {
+        absoluteLimit: editAbsoluteLimit.value
       }, {
         headers: { Authorization: `Bearer ${token}` }
-      })
-      .then(() => toast.success("Daily limit updated"))
-      .catch(err => {
-        toast.error("Failed to update daily limit");
-        console.error(err);
       });
-
-      if (this.checkingAccountId !== null) {
-        axios.patch(`/accounts/${this.checkingAccountId}/absoluteLimit`, {
-          absoluteLimit: this.editAbsoluteLimit
-        }, {
-          headers: { Authorization: `Bearer ${token}` }
-        })
-        .then(() => toast.success("Absolute limit updated"))
-        .catch(err => {
-          toast.error("Failed to update absolute limit");
-          console.error(err);
-        });
-      }
-    }
-  },
-  watch: {
-    filters: {
-      deep: true,
-      handler() {
-        this.loadTransactions();
-      }
+      toast.success("Absolute limit updated");
+    } catch (err) {
+      toast.error("Failed to update absolute limit");
+      console.error(err);
     }
   }
 };
+
+onMounted(() => {
+  loadUser();
+});
+
+watch(filters, () => {
+  loadTransactions();
+}, { deep: true });
 </script>
+
 
 <style scoped>
 .card {
