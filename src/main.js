@@ -23,7 +23,7 @@ import Toast from 'vue-toastification'
 import 'vue-toastification/dist/index.css'
 import EmployeeDashboard from "./components/EmployeeDashboard.vue";
 import IbanSearch from "@/components/IbanSearch.vue";
-import Home from "../components/Home.vue";
+import Home from "@/components/Home.vue";
 import EmployeeTransferUser from './components/EmployeeTransferUser.vue';
 import EmployeeAllTransactionsList from './components/EmployeeAllTransactionsList.vue';
 // Initialize auth token if it exists

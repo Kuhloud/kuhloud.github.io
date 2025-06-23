@@ -5,11 +5,11 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 
 export default defineConfig({
   plugins: [vue(), vueDevTools()],
-  base: '/Kuhloud.github.io', // Critical for GitHub Pages
+  base: '/Kuhloud.github.io/', // Critical for GitHub Pages
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'vue-router': '/vue-router/dist/vue-router.esm-bundler.js' // Explicit path
+      //'vue-router': '/vue-router/dist/vue-router.esm-bundler.js' // Explicit path
     }
   },
   build: {
