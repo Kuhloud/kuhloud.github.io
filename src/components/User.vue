@@ -3,7 +3,6 @@
     <div class="container">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <button class="btn btn-danger" @click="$router.push('/employeedashboard')">← Back</button>
-       
       </div>
 
       <h2 class="mb-4">Customer Overview</h2>
@@ -71,12 +70,11 @@
   </section>
 </template>
 
-
 <script>
 import { userStore } from "@/stores/userStore";
 
 export default {
-  name: "users",
+  name: "UsersOverview",
   data() {
     return {
       users: [],
@@ -88,20 +86,26 @@ export default {
     this.getAllUsers();
   },
   methods: {
-    getAllUsers() {
+    async getAllUsers() {
+      try {
+        const store = userStore();
+        this.users = await store.getAllUsers(this.currentPage, this.pageLimit);
+      } catch (err) {
+        console.error("Failed to load users:", err);
+      }
+    },
+    goToUserDetails(userId) {
       const store = userStore();
-      store
-        .getAllUsers(this.currentPage, this.pageLimit)
-        .then((result) => {
-          this.users = result;
-        })
-        .catch((err) => {
-          console.error("Failed to load users:", err);
-        });
-    },
-    goToUserDetails(id) {
-      this.$router.push(`/users/userdetails/${id}`);
-    },
-  },
+      store.setSelectedUserId(userId); // Store user ID in Pinia
+      this.$router.push('/users/userdetails'); // No ID in URL
+    }
+  }
 };
 </script>
+
+<style scoped>
+.table th,
+.table td {
+  vertical-align: middle;
+}
+</style>

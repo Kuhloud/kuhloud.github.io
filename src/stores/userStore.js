@@ -9,6 +9,7 @@ export const userStore = defineStore('store', {
     user_id: 0,
     role: '',
     user: null,
+    selectedUserId: null,
   }),
   getters: {
     isLoggedIn: (state) => Boolean(state.token),
@@ -100,37 +101,7 @@ fetchUnapprovedCustomers(page, limit) {
   });
 },
 
-approveCustomer(id) {
-  const input = this.activationInputs[id];
-  if (!input || input.dailyLimit == null || input.absoluteLimit == null) {
-    alert("Please enter both daily and absolute limits.");
-    return;
-  }
-
-  axios.post(`/users/${id}/activateuser`, {
-    dailyLimit: input.dailyLimit,
-    absoluteLimit: input.absoluteLimit
-  }, {
-    headers: {
-      Authorization: `Bearer ${getAuthToken()}`,
-      'Content-Type': 'application/json'
-    }
-  })
-  .then(() => {
-    this.fetchUnapprovedCustomers();
-    delete this.activationInputs[id]; // 🔧 FIXED: No this.$delete
-    alert("User successfully activated.");
-  })
-  .catch(err => {
-    const message = err?.response?.data?.message || err.message || "Unknown error";
-    console.error("Activation failed:", message);
-    alert("Failed to activate user: " + message);
-  });
-}
-
-
-,
-    async getUserInfo() {
+    async getUserInfo(user_id) {
       console.log("Current axios defaults:", axios.defaults.headers.common)
       console.log('Authorization header:', getAuthToken())
       try {
@@ -186,6 +157,13 @@ getAllUsers(page, limit) {
       localStorage.removeItem('user_id')
       localStorage.removeItem('role')
       axios.defaults.headers.common['Authorization'] = ''
-    }
+    },
+
+    setSelectedUserId(id) {
+     this.selectedUserId = id;
+    },
+    clearSelectedUserId() {
+    this.selectedUserId = null;
+}
   }
 })

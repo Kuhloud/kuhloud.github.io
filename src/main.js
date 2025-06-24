@@ -64,7 +64,7 @@ const routes = [
     component: InactiveList,
   },
   {
-    path: "/users/userdetails/:id",
+    path: "/users/userdetails",
     component: UserDetails,
     props: true,
   },

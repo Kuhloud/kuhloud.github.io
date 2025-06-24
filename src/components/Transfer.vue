@@ -182,7 +182,7 @@ export default {
         date: new Date().toISOString()
       };
 
-      const success = await transactionStore.submitTransfer(payload, token);
+      const { success, message: backendMsg } = await transactionStore.submitTransfer(payload, token);
       if (success) {
         showMessage("Transfer successful!", "success");
         toAccount.value = null;
