@@ -64,7 +64,7 @@ const performEmployeeTransfer = async (payload, token) => {
 
 
   // Fetch all transactions for a user
-  const fetchTransactions = async (userId, filter) => {
+  const fetchTransactions = async (filter) => {
     // Build URLSearchParams from the filters object, ignoring empty/null values
     const query = new URLSearchParams();
     Object.entries(filter).forEach(([key, value]) => {
@@ -74,10 +74,8 @@ const performEmployeeTransfer = async (payload, token) => {
     });
     loading.value = true
     error.value = null
-    //console.log("Current axios defaults:", axios.defaults.headers.common)
-    //console.log('Authorization header:', getAuthToken())
     try {
-      const response = await axios.get(`http://localhost:8080/transactions/user/${userId}`,
+      const response = await axios.get(`http://localhost:8080/transactions/history`,
       {
         params: query // Pass filters as query params
       });

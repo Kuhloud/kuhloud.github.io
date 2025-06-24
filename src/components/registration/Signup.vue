@@ -67,25 +67,40 @@ export default {
   methods: {
     validatePassword() {
       if (this.confirmPassword !== this.password) {
-        throw new Error("Passwords do not match");
+        throw new Error("Passwords do not match.");
       }
     },
-    bsnIsAllNumeric(bsn) {
-      return /^\d+$/.test(bsn);
+    validateBSN(bsn) {
+      if (!/^\d{8,9}$/.test(bsn)) {
+        throw new Error("BSN must be 8 or 9 digits and only contain numbers.");
+      }
+      //
+      // const digits = bsn.split('').map(Number);
+      // const sum = digits
+      //     .slice(0, -1)
+      //     .reduce((acc, digit, i) => acc + digit * (9 - i), 0) - digits[digits.length - 1];
+      //
+      // if (sum % 11 !== 0) {
+      //   throw new Error("BSN is not valid (failed 11-check).");
+      // }
     },
-    phoneNumberIsFormattedCorrectly(phoneNumber) {
-      return /^\d{3}-\d{3}-\d{4}$/.test(phoneNumber);
+    validatePhoneNumber(phoneNumber) {
+      if (!/^\d{3}-\d{3}-\d{4}$/.test(phoneNumber)) {
+        throw new Error("Phone number must be in the format XXX-XXX-XXXX.");
+      }
     },
     async signup() {
+      this.errorMessage = "";
+
       try {
-        this.validatePassword()
-        this.bsnIsAllNumeric(this.bsn)
-        this.phoneNumberIsFormattedCorrectly(this.phoneNumber)
-        await this.store
-          .signup(this.firstName, this.lastName, this.email, this.password, this.bsn, this.phoneNumber)
-        this.$router.replace('/')
+        this.validatePassword();
+        this.validateBSN(this.bsn);
+        this.validatePhoneNumber(this.phoneNumber);
+        await this.store.signup(this.firstName, this.lastName, this.email, this.password, this.bsn, this.phoneNumber);
+
+        this.$router.replace("/");
       } catch (e) {
-        this.errorMessage = "Could not create an user account. Please try again. " + e.message
+        this.errorMessage = e.message || e.response.data.message;
       }
     }
   }
