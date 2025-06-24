@@ -66,32 +66,22 @@ export const userStore = defineStore('store', {
     },
     async autologin() {
       const token = getAuthToken()
-      try {
-        if (!this.checkValidToken(token)) {
-          this.logout();
-          return;
-        }
-        this.token = token;
-        this.user_id = localStorage.getItem('user_id');
-        this.role = localStorage.getItem('role');
-      } catch (error) {
-        console.error('Auto-login failed:');
+      if (!this.checkValidToken(token)) {
+        this.logout();
+        return;
       }
+      this.token = token;
+      this.user_id = localStorage.getItem('user_id');
+      this.role = localStorage.getItem('role');
     },
     checkValidToken(token) {
       if (!token) {
-        return this.handleInvalidToken()
+        return false;
       }
       const payload = JSON.parse(atob(token.split('.')[1]));
       const isExpired = payload.exp * 1000 < Date.now();
-      if (isExpired) {
-        return this.handleInvalidToken()
-      }
-      return true;
-    },
-    handleInvalidToken() {
-      this.logout();
-      return false;
+      return !isExpired;
+
     },
     validateInput(email) {
       if (email === '') {
