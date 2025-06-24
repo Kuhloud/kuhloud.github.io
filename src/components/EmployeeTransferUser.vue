@@ -159,6 +159,7 @@
   </div>
 </template>
 
+
 <script setup>
 import { ref } from 'vue'
 import { useToast } from 'vue-toastification'
@@ -174,13 +175,12 @@ const transactionStore = useTransactionStore()
 const store = userStore()
 
 // Local state
+const userId = parseInt(localStorage.getItem('user_id'))
 const fromIban = ref('')
 const toIban = ref('')
 const amount = ref(null)
 const description = ref('')
 const loading = ref(false)
-const message = ref('')
-const messageType = ref('')  // 'success' or 'error'
 
 // Modal state for customer picker
 const showPicker = ref(false)
@@ -243,25 +243,22 @@ async function submitTransfer() {
   }
 
   loading.value = true
-  message.value = ''
-  messageType.value = ''
 
-  // Build payload (no userInitiatingTransfer; backend uses JWT)
   const payload = {
     fromAccountIban: fromIban.value,
     toAccountIban: toIban.value,
     amount: parseFloat(amount.value),
     description: description.value,
     date: new Date().toISOString(),
-    employeeTransfer: true
+    userInitiatingTransfer: userId
   }
 
   console.log('[UI] sending payload:', payload)
 
   const token = getAuthToken()
-  const { success, message: backendMsg } = await transactionStore.performEmployeeTransfer(payload, token)
+  const result = await transactionStore.performEmployeeTransfer(payload, token)
 
-  if (success) {
+  if (result.success) {
     toast.success('Transfer completed!')
     // Reset form
     fromIban.value = ''
@@ -269,13 +266,12 @@ async function submitTransfer() {
     amount.value = null
     description.value = ''
   } else {
-    toast.error(backendMsg || 'Transfer failed, try again.')
+    toast.error(result.message || 'Transfer failed, try again.')
   }
 
   loading.value = false
 }
 </script>
-
 
 
 
