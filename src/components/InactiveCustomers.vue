@@ -127,7 +127,7 @@ export default {
         this.activationInputs = inputs;
         this.users = res.data;
       })
-      .catch(err => console.error("Failed to fetch users", err));
+      .catch(err => console.error("Failed to fetch users"));
     },
 
     approveCustomer(id) {
@@ -161,7 +161,7 @@ export default {
       })
       .catch(err => {
         const message = err?.response?.data?.message || err?.message || "Unknown error";
-        console.error("Activation failed:", message, err);
+        console.error("Activation failed");
         this.toast.error("Failed to activate user: " + message);
       });
     }

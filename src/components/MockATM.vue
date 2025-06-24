@@ -73,7 +73,6 @@ onMounted(async () => {
   }
   if (userId) {
     await accountStore.fetchAccounts(userId);
-    console.log('Authorization header:', axios.defaults.headers.common['Authorization'])
   }
 });
 

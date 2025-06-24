@@ -137,7 +137,6 @@ const filters = reactive({
 const loadUser = async () => {
   const id = store.selectedUserId;
   if (!id) {
-    console.error("No selected user ID found in store.");
     return;
   }
 
@@ -158,7 +157,6 @@ const loadUser = async () => {
     userIbans.value = res.data.accounts.map(acc => acc.iban);
     await loadTransactions();
   } catch (err) {
-    console.error("Failed to load user", err);
     user.value = null;
   }
 };
@@ -166,7 +164,6 @@ const loadUser = async () => {
 const loadTransactions = async () => {
   const id = store.selectedUserId;
   if (!id) {
-    console.error("No selected user ID found in store.");
     return;
   }
 
@@ -178,7 +175,7 @@ const loadTransactions = async () => {
     allTransactions.value = res.data;
     filterToUserTransactions();
   } catch (err) {
-    console.error("Failed to load transactions", err);
+    console.error("Failed to load transactions");
   }
 };
 
@@ -220,7 +217,6 @@ const updateLimits = async () => {
     toast.success("Daily limit updated");
   } catch (err) {
     toast.error("Failed to update daily limit");
-    console.error(err);
   }
 
   if (checkingAccountId.value !== null) {
@@ -233,7 +229,6 @@ const updateLimits = async () => {
       toast.success("Absolute limit updated");
     } catch (err) {
       toast.error("Failed to update absolute limit");
-      console.error(err);
     }
   }
 };
