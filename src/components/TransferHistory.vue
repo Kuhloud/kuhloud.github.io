@@ -151,15 +151,6 @@ export default {
       };
     };
 
-    onMounted(async () => {
-      if (userId) {
-        console.log('fetching user info')
-        await accountStore.fetchAccounts(userId);
-        await transactionStore.fetchTransactions(filters.value);
-        console.log('transactions fetched:', transactionStore.transactions);
-      }
-    });
-
     watch(filters, async () => {
       if (userId) {
         await transactionStore.fetchTransactions(filters.value);
