@@ -109,22 +109,23 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, watch } from 'vue';
+import { ref, reactive, onMounted, watch, computed } from 'vue';
 import axios from '@/axios-auth';
 import { getAuthToken } from "@/utils/auth";
 import { useToast } from "vue-toastification";
 import { userStore as useUserStore } from '@/stores/userStore.js';
+import { useTransactionStore } from '@/stores/transactionStore';
 
 const store = useUserStore();
+const transactionStore = useTransactionStore();
 const toast = useToast();
 
 const user = ref(null);
-const allTransactions = ref([]);
-const filteredTransactions = ref([]);
 const userIbans = ref([]);
 const editDailyLimit = ref(0);
 const editAbsoluteLimit = ref(0);
 const checkingAccountId = ref(null);
+
 const filters = reactive({
   startDate: "",
   endDate: "",
@@ -136,16 +137,13 @@ const filters = reactive({
 
 const loadUser = async () => {
   const id = store.selectedUserId;
-  if (!id) {
-    console.error("No selected user ID found in store.");
-    return;
-  }
+  if (!id) return;
 
   try {
     const res = await axios.post(`/users/details`, { userId: id }, {
       headers: { Authorization: `Bearer ${getAuthToken()}` }
     });
-    
+
     user.value = res.data;
     editDailyLimit.value = res.data.dailyLimit;
 
@@ -156,37 +154,19 @@ const loadUser = async () => {
     }
 
     userIbans.value = res.data.accounts.map(acc => acc.iban);
-    await loadTransactions();
+    await transactionStore.fetchTransactions(filters); // Initial load
   } catch (err) {
-    console.error("Failed to load user", err);
+    console.error(err);
     user.value = null;
   }
 };
 
-const loadTransactions = async () => {
-  const id = store.selectedUserId;
-  if (!id) {
-    console.error("No selected user ID found in store.");
-    return;
-  }
-
-  try {
-    const res = await axios.get(`/transactions/user/${id}`, {
-      headers: { Authorization: `Bearer ${getAuthToken()}` },
-      params: filters
-    });
-    allTransactions.value = res.data;
-    filterToUserTransactions();
-  } catch (err) {
-    console.error("Failed to load transactions", err);
-  }
-};
-
-const filterToUserTransactions = () => {
-  filteredTransactions.value = allTransactions.value.filter(tx =>
+// Computed filtering just like in transferhistory.vue
+const filteredTransactions = computed(() => {
+  return transactionStore.transactions.filter(tx =>
     userIbans.value.includes(tx.fromAccountIban) || userIbans.value.includes(tx.toAccountIban)
   );
-};
+});
 
 const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString();
@@ -199,7 +179,7 @@ const resetFilters = () => {
   filters.toIban = "";
   filters.amount = "";
   filters.amountOperator = "eq";
-  loadTransactions();
+  transactionStore.fetchTransactions(filters);
 };
 
 const updateLimits = async () => {
@@ -220,7 +200,6 @@ const updateLimits = async () => {
     toast.success("Daily limit updated");
   } catch (err) {
     toast.error("Failed to update daily limit");
-    console.error(err);
   }
 
   if (checkingAccountId.value !== null) {
@@ -233,7 +212,6 @@ const updateLimits = async () => {
       toast.success("Absolute limit updated");
     } catch (err) {
       toast.error("Failed to update absolute limit");
-      console.error(err);
     }
   }
 };
@@ -242,9 +220,10 @@ onMounted(() => {
   loadUser();
 });
 
-watch(filters, () => {
-  loadTransactions();
+watch(filters, async () => {
+  await transactionStore.fetchTransactions(filters);
 }, { deep: true });
+
 </script>
 
 

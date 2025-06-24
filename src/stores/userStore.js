@@ -75,7 +75,7 @@ export const userStore = defineStore('store', {
         this.user_id = localStorage.getItem('user_id');
         this.role = localStorage.getItem('role');
       } catch (error) {
-        console.error('Error while retrieving data from localStorage:', error)
+        console.error('Auto-login failed:');
       }
     },
     checkValidToken(token) {
@@ -119,8 +119,6 @@ fetchUnapprovedCustomers(page, limit) {
 },
 
     async getUserInfo(user_id) {
-      console.log("Current axios defaults:", axios.defaults.headers.common)
-      console.log('Authorization header:', getAuthToken())
       try {
         const response = await axios.get(`/users/profile`, {
           headers: {
@@ -128,11 +126,9 @@ fetchUnapprovedCustomers(page, limit) {
           },
           withCredentials: true // ✅ Send cookies (if needed)
         });
-        console.log('User info fetched:', response.data);
         this.user = response.data;
       } catch (error) {
-        console.error('Error fetching user:', error.response || error);
-        throw error; // ✅ Throw the full error for debugging
+        throw error;
       }
     },
  

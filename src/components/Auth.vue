@@ -26,7 +26,6 @@ export default {
       this.formData.password = "";
     },
     async handleSubmit() {
-      // console.log("handleSubmit");
       try {
         this.error = null;
         this.isLoading = true;
@@ -46,7 +45,6 @@ export default {
           this.isLogin = true;
         }
       } catch (error) {
-        console.error(error);
         this.error =
           error?.response?.data?.error ||
           "An error occurred during authentication";

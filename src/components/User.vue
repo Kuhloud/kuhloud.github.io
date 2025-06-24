@@ -91,7 +91,7 @@ export default {
         const store = userStore();
         this.users = await store.getAllUsers(this.currentPage, this.pageLimit);
       } catch (err) {
-        console.error("Failed to load users:", err);
+        console.error("Failed to load users");
       }
     },
     goToUserDetails(userId) {

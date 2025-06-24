@@ -71,11 +71,9 @@ export default {
     onMounted(
         async () => {
           try {
-            console.log('fetching user info')
-            // await accountStore.fetchAccounts(user_id);
             await uStore.getUserInfo();
           } catch (error) {
-            console.error("Failed to fetch user:", error);
+            console.error("Failed to fetch user");
           }
         }
     )

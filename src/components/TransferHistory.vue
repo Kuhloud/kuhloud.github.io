@@ -115,10 +115,8 @@ export default {
         return;
       }
       if (userId) {
-        console.log('fetching user info')
         await accountStore.fetchAccounts(userId);
         await transactionStore.fetchTransactions(filters.value);
-        console.log('transactions fetched:');
       }
     });
 

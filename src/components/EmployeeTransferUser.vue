@@ -215,7 +215,6 @@ async function searchUsers() {
       lastName.value
     )
   } catch (err) {
-    console.error('Search failed', err)
     toast.error('Failed to search users.')
   }
 }
@@ -255,8 +254,6 @@ async function submitTransfer() {
     date: new Date().toISOString(),
     employeeTransfer: true
   }
-
-  console.log('[UI] sending payload:', payload)
 
   const token = getAuthToken()
   const { success, message: backendMsg } = await transactionStore.performEmployeeTransfer(payload, token)

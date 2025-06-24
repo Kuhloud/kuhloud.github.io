@@ -69,7 +69,7 @@ export default {
       try {
         this.users = await this.store.getUsersByFirstNameAndLastName(this.firstName, this.lastName);
       } catch (error) {
-        console.error("Search failed:", error);
+
       }
     }
   }

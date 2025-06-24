@@ -37,7 +37,6 @@ export const useTransactionStore = defineStore('transaction', () => {
           : err.response.data.message || err.response.data.error || backendMessage
       }
 
-      console.error('[store] submitTransfer ❌', backendMessage)
       error.value = err
       return { success: false, message: backendMessage }
     } finally {
@@ -86,7 +85,6 @@ export const useTransactionStore = defineStore('transaction', () => {
       transactions.value = resp.data
       return true
     } catch (err) {
-      console.error("[store] fetchAllTransactionsWithRoles ❌", err)
       error.value        = err
       transactions.value = []
       return false
