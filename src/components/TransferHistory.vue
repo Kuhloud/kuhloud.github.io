@@ -107,7 +107,7 @@ export default {
       amountOperator: "eq",
     });
 
-    // Redirect to login if not logged in
+    // Redirect to log in if not logged in
     onMounted(async () => {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -115,8 +115,10 @@ export default {
         return;
       }
       if (userId) {
+        console.log('fetching user info')
         await accountStore.fetchAccounts(userId);
-        await transactionStore.fetchTransactions(userId, filters.value);
+        await transactionStore.fetchTransactions(filters.value);
+        console.log('transactions fetched:');
       }
     });
 
@@ -153,14 +155,14 @@ export default {
       if (userId) {
         console.log('fetching user info')
         await accountStore.fetchAccounts(userId);
-        await transactionStore.fetchTransactions(userId, filters.value);
+        await transactionStore.fetchTransactions(filters.value);
         console.log('transactions fetched:', transactionStore.transactions);
       }
     });
 
     watch(filters, async () => {
       if (userId) {
-        await transactionStore.fetchTransactions(userId, filters.value);
+        await transactionStore.fetchTransactions(filters.value);
       }
     }, { deep: true });
 
