@@ -53,7 +53,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     return await submitTransfer(payload, token)
   }
 
-  const fetchTransactions = async (userId, filter) => {
+  const fetchTransactions = async (filter) => {
     const query = new URLSearchParams()
     Object.entries(filter).forEach(([key, value]) => {
       if (value != null && value !== "") query.append(key, value)
@@ -63,7 +63,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     error.value   = null
     try {
       const resp = await axios.get(
-        `http://localhost:8080/transactions/user/${userId}`,
+        `http://localhost:8080/transactions/history`,
         { params: query }
       )
       transactions.value = resp.data
