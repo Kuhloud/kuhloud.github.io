@@ -2,7 +2,7 @@
 import { defineStore } from 'pinia'
 import axios from 'axios'
 import { ref } from 'vue'
-import { getAuthToken } from "@/utils/auth.js";
+import { getAuthToken } from "@/utils/auth.js"
 
 export const useTransactionStore = defineStore('transaction', () => {
   const transactions = ref([])
@@ -10,14 +10,13 @@ export const useTransactionStore = defineStore('transaction', () => {
   const error        = ref(null)
 
   /**
-   * Regular customer (and now employee) transfers against /transactions/create
-   * @param {{…}} payload
-   * @param {string} token
-   * @returns {Promise<boolean>}
+   * Handles both customer & employee transfers via /transactions/create
+   * Always returns { success: boolean, message?: string }
    */
   const submitTransfer = async (payload, token) => {
     loading.value = true
     error.value   = null
+
     try {
       await axios.post(
         "http://localhost:8080/transactions/create",
@@ -28,35 +27,32 @@ export const useTransactionStore = defineStore('transaction', () => {
           },
         }
       )
-      return true
+      return { success: true }
     } catch (err) {
+      let backendMessage = 'Transfer failed due to an unknown error.'
+
+      if (err.response?.data) {
+        backendMessage = typeof err.response.data === 'string'
+          ? err.response.data
+          : err.response.data.message || err.response.data.error || backendMessage
+      }
+
+      console.error('[store] submitTransfer ❌', backendMessage)
       error.value = err
-      return false
+      return { success: false, message: backendMessage }
     } finally {
       loading.value = false
     }
   }
 
   /**
-   * Employee transfer wrapper:
-   *  - tags payload.employeeTransfer = true
-   *  - re-uses submitTransfer() above
-   * @param {{…}} payload
-   * @param {string} token
-   * @returns {Promise<{success:boolean}>}
+   * Employee transfer wrapper — sets the flag and forwards the full result
    */
   const performEmployeeTransfer = async (payload, token) => {
-    // add the flag our backend looks for
     payload.employeeTransfer = true
-
-    // call the existing create‐endpoint
-    const success = await submitTransfer(payload, token)
-    return { success }
+    return await submitTransfer(payload, token)
   }
 
-  /**
-   * Fetch transactions for one user, applying filters via query params
-   */
   const fetchTransactions = async (userId, filter) => {
     const query = new URLSearchParams()
     Object.entries(filter).forEach(([key, value]) => {
@@ -79,9 +75,6 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
-  /**
-   * Employee‐only: load all txns with initiator role
-   */
   const fetchAllTransactionsWithRoles = async (token) => {
     loading.value = true
     error.value   = null
@@ -103,11 +96,9 @@ export const useTransactionStore = defineStore('transaction', () => {
   }
 
   return {
-    // state
     transactions,
     loading,
     error,
-    // actions
     submitTransfer,
     performEmployeeTransfer,
     fetchTransactions,
