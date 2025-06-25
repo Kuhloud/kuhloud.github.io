@@ -161,7 +161,7 @@ const loadUser = async () => {
   }
 };
 
-// Computed filtering just like in transferhistory.vue
+
 const filteredTransactions = computed(() => {
   return transactionStore.transactions.filter(tx =>
     userIbans.value.includes(tx.fromAccountIban) || userIbans.value.includes(tx.toAccountIban)
