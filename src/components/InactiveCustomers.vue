@@ -136,8 +136,8 @@ export default {
         this.toast.error("Please enter both daily and absolute limits.");
         return;
       }
-      if (input.dailyLimit < 0 || input.absoluteLimit < 0) {
-        this.toast.error("Limits must be zero or positive numbers.");
+      if (input.dailyLimit < 0) {
+        this.toast.error("Daily limit must be zero or positive numbers.");
         return;
       }
 

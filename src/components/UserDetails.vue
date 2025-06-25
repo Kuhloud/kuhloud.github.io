@@ -161,7 +161,7 @@ const loadUser = async () => {
   }
 };
 
-// Computed filtering just like in transferhistory.vue
+
 const filteredTransactions = computed(() => {
   return transactionStore.transactions.filter(tx =>
     userIbans.value.includes(tx.fromAccountIban) || userIbans.value.includes(tx.toAccountIban)
@@ -187,7 +187,7 @@ const updateLimits = async () => {
   const token = getAuthToken();
 
   if (editDailyLimit.value < 0) {
-    toast.error("Limits must be zero or positive numbers.");
+    toast.error("Daily limit must be zero or positive numbers.");
     return;
   }
 

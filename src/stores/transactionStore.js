@@ -93,6 +93,34 @@ export const useTransactionStore = defineStore('transaction', () => {
     }
   }
 
+  const fetchDetailedTransactions = async (token, filter = {}) => {
+  const query = new URLSearchParams()
+  Object.entries(filter).forEach(([key, value]) => {
+    if (value != null && value !== "") query.append(key, value)
+  })
+
+  loading.value = true
+  error.value   = null
+  try {
+    const resp = await axios.get(
+      "http://localhost:8080/transactions/employee-detailedtransactions",
+      {
+        headers: { Authorization: `Bearer ${token}` },
+        params: query
+      }
+    )
+    transactions.value = resp.data
+    return true
+  } catch (err) {
+    console.error("[store] fetchDetailedTransactions ❌", err)
+    error.value        = err
+    transactions.value = []
+    return false
+  } finally {
+    loading.value = false
+  }
+}
+
   return {
     transactions,
     loading,
@@ -100,6 +128,7 @@ export const useTransactionStore = defineStore('transaction', () => {
     submitTransfer,
     performEmployeeTransfer,
     fetchTransactions,
-    fetchAllTransactionsWithRoles
+    fetchAllTransactionsWithRoles,
+    fetchDetailedTransactions
   }
 })
