@@ -187,7 +187,7 @@ const updateLimits = async () => {
   const token = getAuthToken();
 
   if (editDailyLimit.value < 0) {
-    toast.error("Limits must be zero or positive numbers.");
+    toast.error("Daily limit must be zero or positive numbers.");
     return;
   }
 
